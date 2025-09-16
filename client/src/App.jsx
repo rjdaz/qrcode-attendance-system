@@ -7,12 +7,31 @@ const apiUrl =
   "http://localhost/qrcode-attendance-system/server/connection/api.php?action=";
 
 function App() {
+  const [loginStatus, setLoginStatus] = useState(false);
+  
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/login" element={<Login apiUrl={apiUrl} />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/login"
+          element={
+            <Login
+              apiUrl={apiUrl}
+              loginStatus={loginStatus}
+              setLoginStatus={setLoginStatus}
+            />
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <Dashboard
+              loginStatus={loginStatus}
+              setLoginStatus={setLoginStatus}
+            />
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

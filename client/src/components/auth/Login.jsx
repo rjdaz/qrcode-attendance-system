@@ -8,6 +8,7 @@ const Login = ({ apiUrl }) => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [remMeError, setRemMeError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
@@ -16,6 +17,17 @@ const Login = ({ apiUrl }) => {
   const handleSubmit = async (e) => { 
     e.preventDefault();
     setIsSubmitting(true);
+
+    if (!rememberMe) {
+      setRemMeError(true);
+
+      setTimeout(() => {
+        setRemMeError(false);
+        setIsSubmitting(false);
+      }, 2000);
+      return;
+    }
+
     try {
       const url = `${apiUrl}login`;
       const response = await axios.post(url, { username, password });
@@ -129,11 +141,13 @@ const Login = ({ apiUrl }) => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                  className={`h-4 w-4 focus:ring-blue-500 border-slate-300 rounded`}
                 />
                 <label
                   htmlFor="remember-me"
-                  className="ml-2 block text-sm text-slate-700"
+                  className={`ml-2 block text-sm  ${
+                    remMeError ? "text-red-600" : "text-slate-700"
+                  }`}
                 >
                   Remember me
                 </label>

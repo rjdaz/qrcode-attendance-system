@@ -16,5 +16,5 @@
         die("Connection failed: " . mysqli_connect_error());
     }
 
-    echo "connected";
+    //echo "connected";
 ?>

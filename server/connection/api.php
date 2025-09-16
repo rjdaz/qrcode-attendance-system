@@ -1,5 +1,8 @@
 <?php
 
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json");
+
   include 'connection.php';
   include 'header.php';
 
@@ -13,7 +16,7 @@
       login();
     break;
     default:
-      echo "Invalid action"; 
+      //echo "Invalid action"; 
     break;
   }
 
@@ -22,8 +25,17 @@
 
     $data = json_decode(file_get_contents("php://input"), true);
 
+        // FIX: Check for missing credentials
+    if (!$data || !isset($data['username']) || !isset($data['password'])) {
+        echo json_encode(['success' => false, 'error' => 'Missing credentials']);
+        return;
+    }
+
     $username = $data['username'];
     $password = $data['password'];
+
+   // echo "Received username: $username"; // FIX: Debugging line
+   // echo "Received password: $password"; // FIX: Debugging line
 
      // Fetch the admin by username
     $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
@@ -34,14 +46,14 @@
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
 
-        // Verify the password using password_verify
-        if (password_verify($password, $row['password'])) {
-            echo json_encode(['success' => true]);
+        // Compare plain text password (not recommended for production)
+        if ($password === $row['password']) {
+            echo json_encode(['success' => true, 'message' => 'Login successful']);
         } else {
-            echo json_encode(['error' => 'Invalid password']);
+            echo json_encode(['success' => false, 'error' => 'Invalid password']);
         }
     } else {
-        echo json_encode(['error' => 'Invalid username']);
+        echo json_encode(['success' => false, 'error' => 'Invalid username']);
     }
     $stmt->close();
   }

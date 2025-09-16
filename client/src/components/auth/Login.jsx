@@ -1,4 +1,4 @@
-import { use, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, Building2 } from "lucide-react";
 import axios from "axios";
@@ -9,13 +9,17 @@ const Login = ({ apiUrl }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  console.log(apiUrl);
 
   const handleSubmit = async (e) => { 
     e.preventDefault();
-
+    setIsSubmitting(true);
     try {
       const url = `${apiUrl}login`;
       const response = await axios.post(url, { username, password });
+      console.log("Response data:", response.data);
 
       if (response.data.success) {
         // Handle successful login
@@ -29,6 +33,8 @@ const Login = ({ apiUrl }) => {
     } catch (error) {
       console.error("Login error:", error);
       console.log("Error response:", error.response);
+    } finally {
+      setIsSubmitting(false);
     }
   }
 

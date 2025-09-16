@@ -58,7 +58,7 @@ const Login = ({ apiUrl }) => {
             <Building2 className="h-10 w-10 text-white" />
           </div>
           <h2 className="mt-8 text-3xl font-bold text-slate-900">
-            Faculty Portal
+            Cabangan HS Faculty Portal
           </h2>
           <p className="mt-3 text-slate-600 text-lg">
             Sign in to access the QR Attendance System

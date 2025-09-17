@@ -5,7 +5,6 @@ function login($conn) {
     
     $data = json_decode(file_get_contents("php://input"), true);
 
-        // FIX: Check for missing credentials
     if (!$data || !isset($data['username']) || !isset($data['password'])) {
         echo json_encode(['success' => false, 'error' => 'Missing credentials']);
         return;

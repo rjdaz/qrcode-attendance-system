@@ -9,8 +9,10 @@ import {
   FileText,
   BarChart3
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const AttendanceHistory = () => {
+  const navigate = useNavigate();
   // Mock classes data - replace with API call
   
   // Mock attendance history data - replace with API call
@@ -23,6 +25,10 @@ const AttendanceHistory = () => {
   const startIndex = 0;
   const endIndex = 0;
   const currentHistory = [];
+  
+  const handlebacktodashboard = () => {
+    navigate("/dashboard");
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -34,9 +40,11 @@ const AttendanceHistory = () => {
               <button
                 
                 className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                onClick={handlebacktodashboard}
               >
                 <ArrowLeft className="h-5 w-5" />
                 <span>Back to Dashboard</span>
+                
               </button>
             </div>
             <div className="text-center">

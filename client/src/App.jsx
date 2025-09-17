@@ -33,7 +33,7 @@ function App() {
             />
           }
         />
-        <Route path="/history" element={Reports}/>
+        <Route path="/history" element={<Reports/>}/>
       </Routes>
     </BrowserRouter>
   );

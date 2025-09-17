@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/auth/Login";
 import Dashboard from "./components/dashboard/Dashboard";
+import Reports from "./components/history/attendanceHistory";
 
 const apiUrl =
   "http://localhost/qrcode-attendance-system/server/connection/api.php?action=";
@@ -32,6 +33,7 @@ function App() {
             />
           }
         />
+        <Route path="/history" element={Reports}/>
       </Routes>
     </BrowserRouter>
   );

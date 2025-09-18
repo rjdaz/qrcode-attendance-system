@@ -1,6 +1,5 @@
 <?php
 
-
 function login($conn) {
     
     $data = json_decode(file_get_contents("php://input"), true);
@@ -14,17 +13,32 @@ function login($conn) {
     $password = $data['password'];
 
      // Fetch the admin by username
-    $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
+    $stmt = $conn->prepare("SELECT * FROM superadmin WHERE username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
 
+    // to update the password
+    /*$newpw = password_hash('support02', PASSWORD_BCRYPT);
+    $updateStmt = $conn->prepare("UPDATE superadmin SET password = ? WHERE username = ?");
+    $updateStmt->bind_param("ss", $newpw, $username);
+    $updateStmt->execute();
+    $updateStmt->close(); */
+
+     // Check if user exists
+
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
 
-        // Compare plain text password (not recommended for production)
-        if ($password === $row['password']) {
-            echo json_encode(['success' => true, 'message' => 'Login successful']);
+        // verify password
+        if (password_verify($password, $row['password'])) {
+            echo json_encode(['success' => true, 'message' => 'Login successful', 'name' => $row['first_name']]);
+
+            // update the last_login time 
+            $updateStmt = $conn->prepare("UPDATE superadmin SET last_login = NOW() WHERE username = ?");
+            $updateStmt->bind_param("s", $username);
+            $updateStmt->execute();
+            $updateStmt->close();
         } else {
             echo json_encode(['success' => false, 'error' => 'Invalid password']);
         }

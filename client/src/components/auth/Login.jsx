@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, Building2 } from "lucide-react";
 import axios from "axios";
 
-const Login = ({ apiUrl, loginStatus, setLoginStatus }) => {
+const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -13,6 +13,7 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus }) => {
   const navigate = useNavigate();
 
   console.log(apiUrl);
+  console.log(name);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -37,6 +38,8 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus }) => {
         // Handle successful login
         console.log("Login successful");
         navigate("/dashboard");
+        setName(response.data.name); 
+        setLoginStatus(true);
       } else {
         // Handle login error
         alert(response.data.error);

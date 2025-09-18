@@ -15,12 +15,13 @@ import {
   GraduationCap
 } from 'lucide-react';
 
-const Dashboard = ({ loginStatus, setLoginStatus }) => {
+const Dashboard = ({ loginStatus, setLoginStatus, name, setName }) => {
   const navigate = useNavigate();
 
 
   const handleLogout = () => {
     setLoginStatus(false);
+    setName("");
     navigate('/login');
   };
 
@@ -40,8 +41,8 @@ const Dashboard = ({ loginStatus, setLoginStatus }) => {
                 </h1>
                 <p className="text-slate-600">
                   Welcome back,{" "}
-                  <span className="font-semibold text-blue-600"></span>
-                  {/* {user?.name} */}
+                  <span className="font-semibold text-blue-600">{name}</span>
+                  !
                 </p>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./components/auth/Login";
 import Dashboard from "./components/dashboard/Dashboard";
@@ -7,12 +7,25 @@ import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendance";
 import Scanner from "./components/scanners/qrscanners";
 
-const apiUrl =
-  "http://localhost/qrcode-attendance-system/server/connection/api.php?action=";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 function App() {
-  const [loginStatus, setLoginStatus] = useState(false);
-  
+  const [loginStatus, setLoginStatus] = useState(() => {
+    return localStorage.getItem("loginStatus") === "true";
+  });
+  const [name, setName] = useState(() => localStorage.getItem("name") || "");
+
+  // Update localStorage whenever loginStatus or name changes
+  useEffect(() => {
+    localStorage.setItem("loginStatus", loginStatus);
+    localStorage.setItem("name", name);
+  }, [loginStatus, name]);
+
+  // hold routes by redirecting if not logged in
+  const RequireAuth = ({ children }) => {
+    return loginStatus ? children : <Navigate to="/login" />;
+  };
+
   return (
     <BrowserRouter>
       <Routes>
@@ -24,22 +37,56 @@ function App() {
               apiUrl={apiUrl}
               loginStatus={loginStatus}
               setLoginStatus={setLoginStatus}
+              name={name}
+              setName={setName}
             />
           }
         />
         <Route
           path="/dashboard"
           element={
-            <Dashboard
-              loginStatus={loginStatus}
-              setLoginStatus={setLoginStatus}
-            />
+            <RequireAuth>
+              <Dashboard
+                loginStatus={loginStatus}
+                setLoginStatus={setLoginStatus}
+                name={name}
+                setName={setName}
+              />
+            </RequireAuth>
           }
         />
-        <Route path="/history" element={<History/>}/>
-        <Route path="/reports" element={<Reports/>}/>
-        <Route path="/attendance" element={<Attendance/>}/>
-        <Route path="/scanner" element={<Scanner/>}/>
+        <Route
+          path="/history"
+          element={
+            <RequireAuth>
+              <History />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <RequireAuth>
+              <Reports />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/attendance"
+          element={
+            <RequireAuth>
+              <Attendance />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/scanner"
+          element={
+            <RequireAuth>
+              <Scanner />
+            </RequireAuth>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

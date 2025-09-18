@@ -9,11 +9,15 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [remMeError, setRemMeError] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [deptId, setDeptId] = useState(null);
+  const [roleId, setRoleId] = useState(null);
   const navigate = useNavigate();
 
   console.log(apiUrl);
   console.log(name);
+  console.log(deptId);
+  console.log(roleId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,8 +42,22 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
         // Handle successful login
         console.log("Login successful");
         navigate("/dashboard");
-        setName(response.data.name); 
+        setName(response.data.name);
+        setDeptId(response.data.department);
+        setRoleId(response.data.role);
         setLoginStatus(true);
+
+        // conditional navigation based on role and department
+        if (response.data.department === 1) {
+          // Superadmin
+          navigate("/history"); // temporary redirect to history
+        } else if (response.data.department === 2) {
+          // Admin
+          navigate("/attendance"); // temporary redirect to attendance
+        } else {
+          // Student
+          navigate("/dashboard"); // temporary redirect to dashboard
+        }
       } else {
         // Handle login error
         alert(response.data.error);

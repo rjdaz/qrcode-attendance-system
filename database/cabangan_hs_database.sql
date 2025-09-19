@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 18, 2025 at 10:40 AM
+-- Generation Time: Sep 19, 2025 at 06:44 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -24,18 +24,163 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `superadmin`
+-- Table structure for table `department`
 --
 
-CREATE TABLE `superadmin` (
-  `super_admin_id` int(11) NOT NULL,
+CREATE TABLE `department` (
+  `department_id` int(11) NOT NULL,
+  `dept_name` varchar(255) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `department`
+--
+
+INSERT INTO `department` (`department_id`, `dept_name`, `created_at`, `updated_at`) VALUES
+(1, 'System Admin', '2025-09-19 00:05:13', '2025-09-19 00:05:13'),
+(2, 'Admin', '2025-09-19 00:05:45', '2025-09-19 00:05:45'),
+(3, 'Teacher', '2025-09-19 00:06:06', '2025-09-19 00:06:06'),
+(4, 'Utility', '2025-09-19 00:06:19', '2025-09-19 00:06:19'),
+(5, 'Security', '2025-09-19 00:06:31', '2025-09-19 00:06:31');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `gradelevel`
+--
+
+CREATE TABLE `gradelevel` (
+  `grade_level_id` int(11) NOT NULL,
+  `grade_name` varchar(100) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `gradelevel`
+--
+
+INSERT INTO `gradelevel` (`grade_level_id`, `grade_name`, `created_at`, `updated_at`) VALUES
+(1, 'Grade 7', '2025-09-19 23:55:33', '2025-09-19 23:55:33'),
+(2, 'Grade 8', '2025-09-19 23:55:54', '2025-09-19 23:55:54'),
+(3, 'Grade 9', '2025-09-19 23:56:10', '2025-09-19 23:56:10'),
+(4, 'Grade 10', '2025-09-19 23:56:10', '2025-09-19 23:56:10'),
+(5, 'Grade 11', '2025-09-19 23:56:27', '2025-09-19 23:56:27'),
+(6, 'Grade 12', '2025-09-19 23:56:27', '2025-09-19 23:56:27');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `organization`
+--
+
+CREATE TABLE `organization` (
+  `organization_id` int(11) NOT NULL,
+  `unit_name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `status` enum('active','inactive') DEFAULT 'active'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `organization`
+--
+
+INSERT INTO `organization` (`organization_id`, `unit_name`, `description`, `created_at`, `updated_at`, `status`) VALUES
+(1, 'Non-Teaching Staff', 'Non-teaching staff are personnel in schools, colleges, or universities who provide administrative, technical, and support services to assist in the delivery of education', '2025-09-18 21:07:29', '2025-09-18 21:07:29', 'active'),
+(2, 'Teaching Staff', 'Teaching staff are employees in a school, college, or university who are directly involved in educating students. Their primary responsibility is to deliver lessons, guide learning, assess performance, and support student development in academic or technical subjects.', '2025-09-18 21:17:55', '2025-09-18 21:17:55', 'active'),
+(3, 'System Admin', 'is an IT professional responsible for the setup, configuration, maintenance, and security of computer systems, servers, networks, and software applications.', '2025-09-18 21:20:07', '2025-09-18 21:20:07', 'active'),
+(4, 'System Admin Support', 'System Admin Support staff are responsible for assisting the System Administrator in maintaining and managing the organization’s IT infrastructure. Their role focuses on technical support, troubleshooting, and day-to-day operational assistance to ensure that systems, networks, and applications run smoothly for all users.', '2025-09-18 21:32:02', '2025-09-18 21:32:02', 'active'),
+(5, 'Registrar', 'A Registrar is an administrative officer responsible for maintaining and safeguarding student academic records, enrollment data, and official school documents.', '2025-09-18 23:35:25', '2025-09-18 23:35:25', 'active');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `section`
+--
+
+CREATE TABLE `section` (
+  `section_id` int(11) NOT NULL,
+  `section_name` varchar(100) NOT NULL,
+  `grade_level_id` int(11) DEFAULT NULL,
+  `adviser_teacher_id` int(11) DEFAULT NULL,
+  `status` enum('active','inactive') DEFAULT 'active',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `section`
+--
+
+INSERT INTO `section` (`section_id`, `section_name`, `grade_level_id`, `adviser_teacher_id`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Curie', 1, 5, 'active', '2025-09-20 00:10:42', '2025-09-20 00:10:42'),
+(2, 'Integrity', 4, 5, 'active', '2025-09-20 00:16:59', '2025-09-20 00:16:59');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `students`
+--
+
+CREATE TABLE `students` (
+  `student_id` int(11) NOT NULL,
+  `roll_number` varchar(50) NOT NULL,
+  `first_name` varchar(255) NOT NULL,
+  `last_name` varchar(255) NOT NULL,
+  `middle_name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone_number` varchar(15) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` enum('male','female','other') DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `enrollment_date` date NOT NULL,
+  `status` enum('active','inactive','graduated','dropped') DEFAULT 'active',
+  `grade_level` int(11) NOT NULL,
+  `section` int(11) NOT NULL,
+  `organization_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `subjects`
+--
+
+CREATE TABLE `subjects` (
+  `subject_id` int(11) NOT NULL,
+  `subject_code` varchar(50) NOT NULL,
+  `subject_name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `teacher_id` int(11) DEFAULT NULL,
+  `department_id` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `users_id` int(11) NOT NULL,
+  `employee_no` varchar(255) NOT NULL,
   `username` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `first_name` varchar(255) NOT NULL,
   `last_name` varchar(255) NOT NULL,
-  `position` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `phone_number` varchar(15) DEFAULT NULL,
+  `position` varchar(100) NOT NULL,
+  `department_id` int(100) DEFAULT NULL,
+  `organization_id` int(11) DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -43,35 +188,153 @@ CREATE TABLE `superadmin` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `superadmin`
+-- Dumping data for table `users`
 --
 
-INSERT INTO `superadmin` (`super_admin_id`, `username`, `password`, `first_name`, `last_name`, `position`, `email`, `phone_number`, `last_login`, `created_at`, `updated_at`, `status`) VALUES
-(2, 'admin01', '$2y$10$7CRGFrFvhs4p5Ib7gH6Bxu4HDZk4MFUVyOG.O9kTIXwtbz1wAO/R6', 'Ryan Jake', 'Daz', 'System Administrator', 'admin01@gmail.com', '09171234567', '2025-09-18 16:31:53', '2025-09-18 14:59:01', '2025-09-18 16:31:53', 'active'),
-(3, 'support01', '$2y$10$SS69CA.Dub7ffe0GxtQBmeIDDcgohzNS/E.U/SxqKhKHgYRVXxubi', 'Joyce Mariane', 'Dagsil', 'Admin Support', 'adminsupport@gmail.com', '09123456789', '2025-09-18 16:26:39', '2025-09-18 15:57:38', '2025-09-18 16:26:39', 'active'),
-(4, 'support02', '$2y$10$BQ6MTo70sxQs5tKjCWrmwOSbuvTOSM9x/dN8yvTy4zyseXJv8Ts6O', 'Roince', 'Jumao-as', 'Admin Support', 'support@gmail.com', '09987456321', '2025-09-18 16:00:40', '2025-09-18 15:58:56', '2025-09-18 16:00:40', 'active');
+INSERT INTO `users` (`users_id`, `employee_no`, `username`, `password`, `first_name`, `last_name`, `email`, `phone_number`, `position`, `department_id`, `organization_id`, `last_login`, `created_at`, `updated_at`, `status`) VALUES
+(1, 'S250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-19 16:18:10', '2025-09-18 22:58:56', '2025-09-20 00:40:32', 'active'),
+(2, 'S250002', 'sysAdmSupport01', '$2y$10$Rytkpm9LZAHP0iXrOu5tCeL2qRHS64UOiFAL0am0gEMoj37KIm4jm', 'Joyce Mariane', 'Dagsil', 'joycemariane@gmail.com', '09171234567', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:11:48', '2025-09-20 00:40:46', 'active'),
+(3, 'S250003', 'sysAdmSupport02', '$2y$10$UeJlioPdNMo4GdyvGsLnfuAu3PbpOzEcWGd.h5ZOjLJ/7G2pfd92i', 'Roince', 'Jumao-as', 'roince@gmail.com', '09123456789', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:16:43', '2025-09-20 00:41:02', 'active'),
+(4, 'S250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-09-19 00:28:34', '2025-09-18 23:28:16', '2025-09-20 00:41:26', 'active'),
+(5, 'S250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-09-19 16:27:15', '2025-09-18 23:40:56', '2025-09-20 00:41:42', 'active');
 
 --
 -- Indexes for dumped tables
 --
 
 --
--- Indexes for table `superadmin`
+-- Indexes for table `department`
 --
-ALTER TABLE `superadmin`
-  ADD PRIMARY KEY (`super_admin_id`),
+ALTER TABLE `department`
+  ADD PRIMARY KEY (`department_id`),
+  ADD UNIQUE KEY `dept_name` (`dept_name`);
+
+--
+-- Indexes for table `gradelevel`
+--
+ALTER TABLE `gradelevel`
+  ADD PRIMARY KEY (`grade_level_id`),
+  ADD UNIQUE KEY `grade_name` (`grade_name`);
+
+--
+-- Indexes for table `organization`
+--
+ALTER TABLE `organization`
+  ADD PRIMARY KEY (`organization_id`),
+  ADD UNIQUE KEY `unit_name` (`unit_name`);
+
+--
+-- Indexes for table `section`
+--
+ALTER TABLE `section`
+  ADD PRIMARY KEY (`section_id`),
+  ADD KEY `fk_section_grade` (`grade_level_id`),
+  ADD KEY `fk_section_teacher` (`adviser_teacher_id`);
+
+--
+-- Indexes for table `students`
+--
+ALTER TABLE `students`
+  ADD PRIMARY KEY (`student_id`),
+  ADD UNIQUE KEY `roll_number` (`roll_number`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `fk_students_org` (`organization_id`);
+
+--
+-- Indexes for table `subjects`
+--
+ALTER TABLE `subjects`
+  ADD PRIMARY KEY (`subject_id`),
+  ADD UNIQUE KEY `subject_code` (`subject_code`),
+  ADD KEY `fk_subjects_teacher` (`teacher_id`),
+  ADD KEY `fk_subjects_dept` (`department_id`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`users_id`),
   ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `fk_staff_org` (`organization_id`),
+  ADD KEY `fk_department_id` (`department_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
 --
 
 --
--- AUTO_INCREMENT for table `superadmin`
+-- AUTO_INCREMENT for table `department`
 --
-ALTER TABLE `superadmin`
-  MODIFY `super_admin_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+ALTER TABLE `department`
+  MODIFY `department_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `gradelevel`
+--
+ALTER TABLE `gradelevel`
+  MODIFY `grade_level_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `organization`
+--
+ALTER TABLE `organization`
+  MODIFY `organization_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `section`
+--
+ALTER TABLE `section`
+  MODIFY `section_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `students`
+--
+ALTER TABLE `students`
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `subjects`
+--
+ALTER TABLE `subjects`
+  MODIFY `subject_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `section`
+--
+ALTER TABLE `section`
+  ADD CONSTRAINT `fk_section_grade` FOREIGN KEY (`grade_level_id`) REFERENCES `gradelevel` (`grade_level_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_section_teacher` FOREIGN KEY (`adviser_teacher_id`) REFERENCES `users` (`users_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `students`
+--
+ALTER TABLE `students`
+  ADD CONSTRAINT `fk_students_org` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`organization_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `subjects`
+--
+ALTER TABLE `subjects`
+  ADD CONSTRAINT `fk_subjects_dept` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_subjects_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`users_id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `fk_department_id` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`),
+  ADD CONSTRAINT `fk_staff_org` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`organization_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -43,7 +43,7 @@ function login($conn) {
             echo json_encode(['success' => false, 'error' => 'Invalid password']);
         }
     } else {
-        echo json_encode(['success' => false, 'error' => 'Invalid username']);
+        echo json_encode(['success' => false, 'errorUname' => 'Invalid username']);
     }
     $stmt->close();
   }

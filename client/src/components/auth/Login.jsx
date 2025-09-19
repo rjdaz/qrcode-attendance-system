@@ -9,10 +9,15 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [remMeError, setRemMeError] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); 
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [deptId, setDeptId] = useState(null);
   const [roleId, setRoleId] = useState(null);
   const navigate = useNavigate();
+
+  const [errors, setErrors] = useState({
+    username: "",
+    password: "",
+  });
 
   console.log(apiUrl);
   console.log(name);
@@ -62,6 +67,12 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
         // Handle login error
         alert(response.data.error);
         console.log("Login failed:", response.data.error);
+
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          username: response.data.errorUname || "",
+          password: response.data.error || "",
+        }));
       }
     } catch (error) {
       console.error("Login error:", error);
@@ -84,7 +95,16 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
           <p className="mt-3 text-slate-600 text-lg">
             Sign in to access the QR Attendance System
           </p>
-          <div className="mt-2 w-24 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full"></div>
+          <div className="mt-2 pt-0.5 w-30 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full">
+            {/* error username */}
+            {errors.username && (
+              <p className="mt-2 text-sm text-red-600">{errors.username}</p>
+            )}
+            {/* error password */}
+            {errors.password && (
+              <p className="mt-2 text-sm text-red-600">{errors.password}</p>
+            )}
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
@@ -95,25 +115,21 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
                   <User className="h-5 w-5 text-slate-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
+                  id="username"
+                  name="username"
                   type="text"
-                  autoComplete="email"
+                  autoComplete="username"
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className={`block w-full pl-12 pr-4 py-3 border-2 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 `}
-                  // ${
-                  //   errors.email
-                  //     ? "border-red-300 focus:ring-red-500 focus:border-red-500"
-                  //     : "border-slate-200 hover:border-slate-300"
-                  // }
-                  placeholder="Enter your email"
+                  className={`block w-full pl-12 pr-4 py-3 border-2 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200  ${
+                    errors.username
+                      ? "border-red-300 focus:ring-red-500 focus:border-red-500"
+                      : "border-slate-200 hover:border-slate-300"
+                  }`}
+                  placeholder="Enter your username"
                 />
               </div>
-              {/* {errors.email && (
-                <p className="mt-2 text-sm text-red-600">{errors.email}</p>
-              )} */}
             </div>
 
             <div>
@@ -129,14 +145,13 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={`block w-full pl-12 pr-12 py-3 border-2 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 `}
-                  placeholder="Enter your password"
-                />
-                {/* ${
+                  className={`block w-full pl-12 pr-12 py-3 border-2 rounded-xl shadow-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 ${
                     errors.password
                       ? "border-red-300 focus:ring-red-500 focus:border-red-500"
                       : "border-slate-200 hover:border-slate-300"
-                  } */}
+                  }`}
+                  placeholder="Enter your password"
+                />
                 <button
                   type="button"
                   className="absolute inset-y-0 right-0 pr-4 flex items-center"
@@ -149,9 +164,6 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
                   )}
                 </button>
               </div>
-              {/* {errors.password && (
-                <p className="mt-2 text-sm text-red-600">{errors.password}</p>
-              )} */}
             </div>
 
             <div className="flex items-center justify-between">
@@ -196,7 +208,7 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
             <p className="text-sm text-blue-800 text-center">
               <span className="font-semibold">Demo Credentials:</span>
               <br />
-              Email: faculty@example.com
+              Username: faculty
               <br />
               Password: password123
             </p>

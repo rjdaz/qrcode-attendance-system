@@ -14,12 +14,14 @@ function App() {
     return localStorage.getItem("loginStatus") === "true";
   });
   const [name, setName] = useState(() => localStorage.getItem("name") || "");
+  const [employeeNo, setEmployeeNo] = useState(() => localStorage.getItem("employeeNo") || "");
 
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {
     localStorage.setItem("loginStatus", loginStatus);
     localStorage.setItem("name", name);
-  }, [loginStatus, name]);
+    localStorage.setItem("employeeNo", employeeNo);
+  }, [loginStatus, name, employeeNo]);
 
   // hold routes by redirecting if not logged in
   const RequireAuth = ({ children }) => {
@@ -39,6 +41,7 @@ function App() {
               setLoginStatus={setLoginStatus}
               name={name}
               setName={setName}
+              setEmployeeNo={setEmployeeNo}
             />
           }
         />
@@ -47,10 +50,12 @@ function App() {
           element={
             <RequireAuth>
               <Dashboard
+                apiUrl={apiUrl}
                 loginStatus={loginStatus}
                 setLoginStatus={setLoginStatus}
                 name={name}
                 setName={setName}
+                employeeNo={employeeNo}
               />
             </RequireAuth>
           }

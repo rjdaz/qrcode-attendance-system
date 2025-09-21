@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import axios from 'axios';
 import { 
   QrCode, 
   Users, 
@@ -15,10 +15,29 @@ import {
   GraduationCap
 } from 'lucide-react';
 
-const Dashboard = ({ loginStatus, setLoginStatus, name, setName }) => {
+const Dashboard = ({ apiUrl, loginStatus, setLoginStatus, name, setName, employeeNo}) => {
   const navigate = useNavigate();
+  const [classes, setClasses] = useState([]);
 
+  //get the todays classes
+  useEffect(() => { 
+    const url = `${apiUrl}getClassesToday`;
+    const fetchClasses = async () => {
+      try {
+        const response = await axios.post(url, {
+          employeeNo
+        });
 
+        if (response.data.success) { 
+          
+        }
+      } catch (err) {
+        
+       }
+    };
+  }, []);
+
+  //handle to logout
   const handleLogout = () => {
     setLoginStatus(false);
     setName("");

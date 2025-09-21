@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, Building2 } from "lucide-react";
 import axios from "axios";
 
-const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
+const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName, setEmployeeNo }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -50,6 +50,7 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName }) => {
         setName(response.data.name);
         setDeptId(response.data.department);
         setRoleId(response.data.role);
+        setEmployeeNo(response.data.employeeNo);
         setLoginStatus(true);
 
         // conditional navigation based on role and department

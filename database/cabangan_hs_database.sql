@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 19, 2025 at 06:44 PM
+-- Generation Time: Sep 21, 2025 at 05:43 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -157,11 +157,22 @@ CREATE TABLE `subjects` (
   `subject_code` varchar(50) NOT NULL,
   `subject_name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
+  `days` enum('Mon','Tue','Wed','Thu','Fri') NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `room_name` varchar(255) NOT NULL,
   `teacher_id` int(11) DEFAULT NULL,
   `department_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `subjects`
+--
+
+INSERT INTO `subjects` (`subject_id`, `subject_code`, `subject_name`, `description`, `days`, `start_time`, `end_time`, `room_name`, `teacher_id`, `department_id`, `created_at`, `updated_at`) VALUES
+(1, 'ENG10INT', 'English', 'English', 'Mon', '07:00:00', '08:00:00', 'Integrity', 5, 3, '2025-09-21 22:51:21', '2025-09-21 23:29:19');
 
 -- --------------------------------------------------------
 
@@ -192,7 +203,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`users_id`, `employee_no`, `username`, `password`, `first_name`, `last_name`, `email`, `phone_number`, `position`, `department_id`, `organization_id`, `last_login`, `created_at`, `updated_at`, `status`) VALUES
-(1, 'S250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-19 16:18:10', '2025-09-18 22:58:56', '2025-09-20 00:40:32', 'active'),
+(1, 'S250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-21 22:45:47', '2025-09-18 22:58:56', '2025-09-21 22:45:47', 'active'),
 (2, 'S250002', 'sysAdmSupport01', '$2y$10$Rytkpm9LZAHP0iXrOu5tCeL2qRHS64UOiFAL0am0gEMoj37KIm4jm', 'Joyce Mariane', 'Dagsil', 'joycemariane@gmail.com', '09171234567', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:11:48', '2025-09-20 00:40:46', 'active'),
 (3, 'S250003', 'sysAdmSupport02', '$2y$10$UeJlioPdNMo4GdyvGsLnfuAu3PbpOzEcWGd.h5ZOjLJ/7G2pfd92i', 'Roince', 'Jumao-as', 'roince@gmail.com', '09123456789', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:16:43', '2025-09-20 00:41:02', 'active'),
 (4, 'S250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-09-19 00:28:34', '2025-09-18 23:28:16', '2025-09-20 00:41:26', 'active'),
@@ -297,7 +308,7 @@ ALTER TABLE `students`
 -- AUTO_INCREMENT for table `subjects`
 --
 ALTER TABLE `subjects`
-  MODIFY `subject_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `subject_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`

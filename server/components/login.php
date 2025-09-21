@@ -32,7 +32,7 @@ function login($conn) {
         
         // verify password
         if (password_verify($password, $row['password'])) {
-            echo json_encode(['success' => true, 'message' => 'Login successful', 'name' => $row['first_name'], 'department' => $row['department_id'], 'role' => $row['organization_id']]);
+            echo json_encode(['success' => true, 'message' => 'Login successful', 'name' => $row['first_name'], 'department' => $row['department_id'], 'role' => $row['organization_id'], 'employeeNo' => $row['employee_no']]);
 
             // update the last_login time 
             $updateStmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE username = ?");

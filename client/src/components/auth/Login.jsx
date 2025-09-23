@@ -3,7 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, Building2 } from "lucide-react";
 import axios from "axios";
 
-const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName, setEmployeeNo }) => {
+const Login = ({
+  apiUrl,
+  loginStatus,
+  setLoginStatus,
+  name,
+  setName,
+  setEmployeeNo,
+}) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -56,10 +63,10 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName, setEmployee
         // conditional navigation based on role and department
         if (response.data.department === 1) {
           // Superadmin
-          navigate("/adminDashboard"); // temporary redirect to admin dashboard
+          navigate("/history"); // temporary redirect to admin dashboard
         } else if (response.data.department === 2) {
           // Admin
-          navigate("/attendance"); // temporary redirect to attendance
+          navigate("/adminDashboard"); // temporary redirect to admin dashboard
         } else {
           // Teacher
           navigate("/dashboard"); // temporary redirect to dashboard

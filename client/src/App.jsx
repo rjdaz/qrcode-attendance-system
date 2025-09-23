@@ -7,7 +7,9 @@ import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendance";
 import Scanner from "./components/scanners/qrscanners";
 
-const apiUrl = import.meta.env.VITE_API_URL;
+//const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl =
+  "http://localhost/qrcode-attendance-system/server/connection/api.php?action=";
 
 function App() {
   const [loginStatus, setLoginStatus] = useState(() => {

@@ -56,7 +56,7 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName, setEmployee
         // conditional navigation based on role and department
         if (response.data.department === 1) {
           // Superadmin
-          navigate("/history"); // temporary redirect to history
+          navigate("/adminDashboard"); // temporary redirect to admin dashboard
         } else if (response.data.department === 2) {
           // Admin
           navigate("/attendance"); // temporary redirect to attendance

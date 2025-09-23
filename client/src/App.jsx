@@ -6,6 +6,7 @@ import History from "./components/history/attendanceHistory";
 import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendance";
 import Scanner from "./components/scanners/qrscanners";
+import AdminDashboard from "./components/AdminDashboard/AdminLayout";
 
 //const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl =
@@ -16,7 +17,9 @@ function App() {
     return localStorage.getItem("loginStatus") === "true";
   });
   const [name, setName] = useState(() => localStorage.getItem("name") || "");
-  const [employeeNo, setEmployeeNo] = useState(() => localStorage.getItem("employeeNo") || "");
+  const [employeeNo, setEmployeeNo] = useState(
+    () => localStorage.getItem("employeeNo") || ""
+  );
 
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {
@@ -45,6 +48,14 @@ function App() {
               setName={setName}
               setEmployeeNo={setEmployeeNo}
             />
+          }
+        />
+        <Route
+          path="/adminDashboard"
+          element={
+            <RequireAuth>
+              <AdminDashboard />
+            </RequireAuth>
           }
         />
         <Route

@@ -1,47 +1,62 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { 
-  QrCode, 
-  Users, 
-  Calendar, 
-  BarChart3, 
-  Clock, 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  QrCode,
+  Users,
+  Calendar,
+  BarChart3,
+  Clock,
   LogOut,
   Plus,
   Search,
   Filter,
   Building2,
-  GraduationCap
-} from 'lucide-react';
+  GraduationCap,
+} from "lucide-react";
 
-const Dashboard = ({ apiUrl, loginStatus, setLoginStatus, name, setName, employeeNo}) => {
+const Dashboard = ({
+  apiUrl,
+  loginStatus,
+  setLoginStatus,
+  name,
+  setName,
+  employeeNo,
+}) => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
 
-  //get the todays classes
-  useEffect(() => { 
-    const url = `${apiUrl}getClassesToday`;
-    const fetchClasses = async () => {
-      try {
-        const response = await axios.post(url, {
-          employeeNo
-        });
+  // get the current date
+  const [currentDate, setCurrentDate] = useState(new Date());
 
-        if (response.data.success) { 
-          
-        }
-      } catch (err) {
-        
-       }
-    };
+  console.log(currentDate);
+  console.log(classes);
+
+  //get the todays classes
+  useEffect(() => {
+    fetchClasses();
   }, []);
+
+  const fetchClasses = async () => {
+    const url = `${apiUrl}getClassesToday`;
+    try {
+      const response = await axios.post(url, {
+        employeeNo,
+        day: currentDate.toLocaleDateString("en-US", { weekday: "short" }),
+      });
+      console.log()
+      if (response.data.success) {
+        setClasses(response.data.classes);
+        console.log(response.data.classes);
+      }
+    } catch (err) {}
+  };
 
   //handle to logout
   const handleLogout = () => {
     setLoginStatus(false);
     setName("");
-    navigate('/login');
+    navigate("/login");
   };
 
   return (
@@ -60,8 +75,7 @@ const Dashboard = ({ apiUrl, loginStatus, setLoginStatus, name, setName, employe
                 </h1>
                 <p className="text-slate-600">
                   Welcome back,{" "}
-                  <span className="font-semibold text-blue-600">{name}</span>
-                  !
+                  <span className="font-semibold text-blue-600">{name}</span>!
                 </p>
               </div>
             </div>
@@ -212,69 +226,65 @@ const Dashboard = ({ apiUrl, loginStatus, setLoginStatus, name, setName, employe
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/*  */}
             <div
-                // key={cls.id}
-                className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
-              >
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-6">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        {/* {cls.name} */}
-                      </h3>
-                      <p className="text-blue-600 font-semibold text-lg">
-                        {/* {cls.subject} */}
-                      </p>
-                    </div>
-                    <span
-                      className={`px-3 py-1 text-sm font-semibold rounded-full border `}
-                    >
-                      {/* ${getAttendanceColor(
+              // key={cls.id}
+              className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+            >
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">
+                      {/* {cls.name} */}
+                    </h3>
+                    <p className="text-blue-600 font-semibold text-lg">
+                      {/* {cls.subject} */}
+                    </p>
+                  </div>
+                  <span
+                    className={`px-3 py-1 text-sm font-semibold rounded-full border `}
+                  >
+                    {/* ${getAttendanceColor(
                         cls.attendancePercentage
                       )}
                       {cls.attendancePercentage}% */}
+                  </span>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center text-slate-600">
+                    <Calendar className="h-4 w-4 mr-3 text-blue-500" />
+                    <span className="font-medium">{/* {cls.schedule} */}</span>
+                  </div>
+                  <div className="flex items-center text-slate-600">
+                    <Users className="h-4 w-4 mr-3 text-blue-500" />
+                    <span className="font-medium">
+                      {/* {cls.totalStudents} students • {cls.presentToday}{" "} */}
+                      present today
                     </span>
                   </div>
-
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center text-slate-600">
-                      <Calendar className="h-4 w-4 mr-3 text-blue-500" />
-                      <span className="font-medium">
-                        {/* {cls.schedule} */}
-                        </span>
-                    </div>
-                    <div className="flex items-center text-slate-600">
-                      <Users className="h-4 w-4 mr-3 text-blue-500" />
-                      <span className="font-medium">
-                        {/* {cls.totalStudents} students • {cls.presentToday}{" "} */}
-                        present today
-                      </span>
-                    </div>
-                    <div className="flex items-center text-slate-600">
-                      <Clock className="h-4 w-4 mr-3 text-blue-500" />
-                      <span className="font-medium">
-                        {/* {cls.room} */}
-                        </span>
-                    </div>
-                  </div>
-
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={() => navigate("/scanner")}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
-                    >
-                      <QrCode className="h-4 w-4 mr-2" />
-                      Start Scanning
-                    </button>
-                    <button
-                      onClick={() => navigate("/attendance")}
-                      className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border border-slate-200"
-                    >
-                      View Attendance
-                    </button>
+                  <div className="flex items-center text-slate-600">
+                    <Clock className="h-4 w-4 mr-3 text-blue-500" />
+                    <span className="font-medium">{/* {cls.room} */}</span>
                   </div>
                 </div>
+
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => navigate("/scanner")}
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    Start Scanning
+                  </button>
+                  <button
+                    onClick={() => navigate("/attendance")}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border border-slate-200"
+                  >
+                    View Attendance
+                  </button>
+                </div>
               </div>
-              {/*  */}
+            </div>
+            {/*  */}
             {/* {filteredClasses.map((cls) => (
               <div
                 key={cls.id}

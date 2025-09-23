@@ -61,7 +61,7 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, name, setName, setEmployee
           // Admin
           navigate("/attendance"); // temporary redirect to attendance
         } else {
-          // Student
+          // Teacher
           navigate("/dashboard"); // temporary redirect to dashboard
         }
       } else {

@@ -3,7 +3,7 @@
   include 'header.php';
 
   // files
-  include '../components/login.php';
+  include '../components/login/login.php';
   include '../components/getClassesToday.php';
 
   $action = isset($_GET['action']) ? $_GET['action'] : '';

@@ -20,6 +20,7 @@ function App() {
   const [employeeNo, setEmployeeNo] = useState(
     () => localStorage.getItem("employeeNo") || ""
   );
+  const [subId, setSubId] = useState(() => localStorage.getItem("subId") || "");
 
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {
@@ -69,6 +70,7 @@ function App() {
                 name={name}
                 setName={setName}
                 employeeNo={employeeNo}
+                setSubId={setSubId}
               />
             </RequireAuth>
           }
@@ -98,10 +100,10 @@ function App() {
           }
         />
         <Route
-          path="/scanner"
+          path="/scanner/:subId"
           element={
             <RequireAuth>
-              <Scanner />
+              <Scanner subId={subId} />
             </RequireAuth>
           }
         />

@@ -22,6 +22,7 @@ const Dashboard = ({
   name,
   setName,
   employeeNo,
+  setSubId,
 }) => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
@@ -31,20 +32,21 @@ const Dashboard = ({
 
   console.log(currentDate);
   console.log(classes);
+  console.log(employeeNo);
 
   //get the todays classes
   useEffect(() => {
     fetchClasses();
-  }, []);
+  }, [setClasses]);
 
   const fetchClasses = async () => {
     const url = `${apiUrl}getClassesToday`;
     try {
       const response = await axios.post(url, {
         employeeNo,
-        day: currentDate.toLocaleDateString("en-US", { weekday: "short" }),
       });
-      console.log()
+
+      console.log(response.data.empNoResult);
       if (response.data.success) {
         setClasses(response.data.classes);
         console.log(response.data.classes);
@@ -58,6 +60,11 @@ const Dashboard = ({
     setName("");
     navigate("/login");
   };
+
+  //check time of AM or PM 
+  const ampm = (time) => { 
+    return time >= "12:00" ? "PM" : "AM";
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -119,8 +126,8 @@ const Dashboard = ({
                   <p className="text-sm font-medium text-slate-600">
                     Classes Today
                   </p>
-                  <p className="text-3xl font-bold text-slate-900">
-                    {/* {todayStats.totalClasses} */}
+                  <p className="text-3xl text-center font-bold text-slate-900">
+                    {classes.length}
                   </p>
                 </div>
               </div>
@@ -225,7 +232,7 @@ const Dashboard = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/*  */}
-            <div
+            {/* <div
               // key={cls.id}
               className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
             >
@@ -233,37 +240,35 @@ const Dashboard = ({
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-slate-900 mb-2">
-                      {/* {cls.name} */}
+                      {cls.name}
                     </h3>
                     <p className="text-blue-600 font-semibold text-lg">
-                      {/* {cls.subject} */}
+                      {cls.subject}
                     </p>
                   </div>
                   <span
                     className={`px-3 py-1 text-sm font-semibold rounded-full border `}
                   >
-                    {/* ${getAttendanceColor(
-                        cls.attendancePercentage
-                      )}
-                      {cls.attendancePercentage}% */}
+                    {getAttendanceColor(cls.attendancePercentage)}
+                      {cls.attendancePercentage}%
                   </span>
                 </div>
 
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center text-slate-600">
                     <Calendar className="h-4 w-4 mr-3 text-blue-500" />
-                    <span className="font-medium">{/* {cls.schedule} */}</span>
+                    <span className="font-medium">{cls.schedule}</span>
                   </div>
                   <div className="flex items-center text-slate-600">
                     <Users className="h-4 w-4 mr-3 text-blue-500" />
                     <span className="font-medium">
-                      {/* {cls.totalStudents} students • {cls.presentToday}{" "} */}
+                      {cls.totalStudents} students • {cls.presentToday}{" "}
                       present today
                     </span>
                   </div>
                   <div className="flex items-center text-slate-600">
                     <Clock className="h-4 w-4 mr-3 text-blue-500" />
-                    <span className="font-medium">{/* {cls.room} */}</span>
+                    <span className="font-medium">{cls.room}</span>
                   </div>
                 </div>
 
@@ -283,27 +288,28 @@ const Dashboard = ({
                   </button>
                 </div>
               </div>
-            </div>
+            </div> */}
             {/*  */}
-            {/* {filteredClasses.map((cls) => (
+            {classes.map((cls) => (
               <div
-                key={cls.id}
+                key={cls.subject_id}
                 className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
               >
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-6">
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-slate-900 mb-2">
-                        {cls.name}
+                      <h3 className="text-xl text-center font-bold text-slate-900 mb-2">
+                        {cls.subject_name}
                       </h3>
-                      <p className="text-blue-600 font-semibold text-lg">
-                        {cls.subject}
+                      <p className="text-blue-600 text-center font-semibold text-lg">
+                        {cls.subject_code}
                       </p>
                     </div>
                     <span
-                      className={`px-3 py-1 text-sm font-semibold rounded-full border ${getAttendanceColor(
-                        cls.attendancePercentage
-                      )}`}
+                      className={`px-3 py-1 text-sm font-semibold rounded-full border `}
+                      // ${getAttendanceColor(
+                      //   cls.attendancePercentage
+                      // )}
                     >
                       {cls.attendancePercentage}%
                     </span>
@@ -312,7 +318,9 @@ const Dashboard = ({
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center text-slate-600">
                       <Calendar className="h-4 w-4 mr-3 text-blue-500" />
-                      <span className="font-medium">{cls.schedule}</span>
+                      <span className="font-medium">{
+                        cls.days + " " + cls.start_time.slice(0, -3) + " - " + cls.end_time.slice(0, -3) + " " + ampm(cls.start_time)
+                      }</span>
                     </div>
                     <div className="flex items-center text-slate-600">
                       <Users className="h-4 w-4 mr-3 text-blue-500" />
@@ -323,13 +331,16 @@ const Dashboard = ({
                     </div>
                     <div className="flex items-center text-slate-600">
                       <Clock className="h-4 w-4 mr-3 text-blue-500" />
-                      <span className="font-medium">{cls.room}</span>
+                      <span className="font-medium">{cls.room_name}</span> 
                     </div>
                   </div>
 
                   <div className="flex space-x-3">
                     <button
-                      onClick={() => navigate(`/scanner/${cls.id}`)}
+                      onClick={() => {
+                        navigate(`/scanner/${cls.subject_code}`);
+                        setSubId(cls.subject_code);
+                      }}
                       className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
                     >
                       <QrCode className="h-4 w-4 mr-2" />
@@ -344,10 +355,10 @@ const Dashboard = ({
                   </div>
                 </div>
               </div>
-            ))} */}
+            ))}
           </div>
 
-          {/* {filteredClasses.length === 0 && (
+          {classes.length === 0 && (
             <div className="text-center py-16">
               <Users className="h-16 w-16 text-slate-400 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-slate-900 mb-2">
@@ -357,7 +368,7 @@ const Dashboard = ({
                 Try adjusting your search or filter criteria.
               </p>
             </div>
-          )} */}
+          )}
         </div>
       </div>
     </div>

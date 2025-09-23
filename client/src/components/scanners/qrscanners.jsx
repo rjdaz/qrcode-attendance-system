@@ -10,8 +10,13 @@ import {
   Building2,
   QrCode
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const QRScanner = () => {
+const QRScanner = (
+  subId,
+) => {
+  const navigate = useNavigate();
   // Mock class data - replace with API call
   
   // Mock students data - replace with API call
@@ -24,7 +29,7 @@ const QRScanner = () => {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
               <button
-                
+                onClick={() => navigate('/dashboard')}
                 className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-lg transition-all duration-200"
               >
                 <ArrowLeft className="h-5 w-5" />

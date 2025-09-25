@@ -90,6 +90,7 @@ function App() {
               <Reports />
             </RequireAuth>
           }
+          
         />
         <Route
           path="/attendance"

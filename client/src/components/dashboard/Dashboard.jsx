@@ -358,6 +358,7 @@ const Dashboard = ({
             ))}
           </div>
 
+          
           {classes.length === 0 && (
             <div className="text-center py-16">
               <Users className="h-16 w-16 text-slate-400 mx-auto mb-4" />

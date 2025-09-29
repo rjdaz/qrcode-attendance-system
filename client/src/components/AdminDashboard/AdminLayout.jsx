@@ -21,15 +21,19 @@ import {
   X,
   Edit,
   UserX,
+  Menu,
+  ChevronLeft,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 const AdminLayout = () => {
   // Simple beginner-friendly state and data
   const [searchText, setSearchText] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState("student"); // "student" | "teacher"
-  const API_BASE = "http://localhost/qrcode-attendance-system/server/connection/api.php";
+  const API_BASE =
+    "http://localhost/qrcode-attendance-system/server/connection/api.php";
   const [studentForm, setStudentForm] = useState({
     roll_number: "",
     first_name: "",
@@ -50,7 +54,7 @@ const AdminLayout = () => {
   const [studentStats, setStudentStats] = useState({
     active: 0,
     inactive: 0,
-    withAttendanceIssues: 0
+    withAttendanceIssues: 0,
   });
   const [statsLoading, setStatsLoading] = useState(true);
   const [students, setStudents] = useState([]);
@@ -76,8 +80,7 @@ const AdminLayout = () => {
   });
   const [editSaving, setEditSaving] = useState(false);
   const [editError, setEditError] = useState("");
-  const [disablingStudent, setDisablingStudent] = useState(false);
-  const [enablingStudent, setEnablingStudent] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     section: "",
@@ -90,8 +93,8 @@ const AdminLayout = () => {
   const fetchStudents = async () => {
     try {
       setStudentsLoading(true);
-      const res = await fetch(`${API_BASE}?action=getStudents`);
-      const data = await res.json();
+      const response = await axios.get(`${API_BASE}?action=getStudents`);
+      const data = response.data;
       if (data.success) {
         setStudents(data.data);
       } else {
@@ -110,8 +113,8 @@ const AdminLayout = () => {
   const fetchStudentStats = async () => {
     try {
       setStatsLoading(true);
-      const res = await fetch(`${API_BASE}?action=getStudentStats`);
-      const data = await res.json();
+      const response = await axios.get(`${API_BASE}?action=getStudentStats`);
+      const data = response.data;
       if (data.success) {
         setStudentStats(data.data);
       } else {
@@ -159,7 +162,13 @@ const AdminLayout = () => {
 
   const openForm = (type) => {
     setFormType(type);
-    setFormData({ name: "", section: "", guardian: "", subject: "", phone: "" });
+    setFormData({
+      name: "",
+      section: "",
+      guardian: "",
+      subject: "",
+      phone: "",
+    });
     setStudentForm({
       roll_number: "",
       first_name: "",
@@ -189,7 +198,11 @@ const AdminLayout = () => {
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    alert(`${formType === "student" ? "Student" : "Teacher"} application submitted (mock):\n` + JSON.stringify(formData, null, 2));
+    alert(
+      `${
+        formType === "student" ? "Student" : "Teacher"
+      } application submitted (mock):\n` + JSON.stringify(formData, null, 2)
+    );
     setShowForm(false);
   };
 
@@ -253,17 +266,17 @@ const AdminLayout = () => {
     setStudentError("");
     setStudentSaving(true);
     try {
-      const res = await fetch(`${API_BASE}?action=registerStudent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...studentForm,
-          grade_level: studentForm.grade_level ? parseInt(studentForm.grade_level) : null,
-          section: studentForm.section ? parseInt(studentForm.section) : null,
-          organization_id: studentForm.organization_id ? parseInt(studentForm.organization_id) : null,
-        }),
+      const response = await axios.post(`${API_BASE}?action=registerStudent`, {
+        ...studentForm,
+        grade_level: studentForm.grade_level
+          ? parseInt(studentForm.grade_level)
+          : null,
+        section: studentForm.section ? parseInt(studentForm.section) : null,
+        organization_id: studentForm.organization_id
+          ? parseInt(studentForm.organization_id)
+          : null,
       });
-      const data = await res.json();
+      const data = response.data;
       if (data.success) {
         alert("Student registered successfully.");
         setShowForm(false);
@@ -273,7 +286,9 @@ const AdminLayout = () => {
         setStudentError(data.message || "Failed to register student");
       }
     } catch (err) {
-      setStudentError(err.message || "Network error");
+      setStudentError(
+        err.response?.data?.message || err.message || "Network error"
+      );
     } finally {
       setStudentSaving(false);
     }
@@ -284,17 +299,17 @@ const AdminLayout = () => {
     setEditError("");
     setEditSaving(true);
     try {
-      const res = await fetch(`${API_BASE}?action=updateStudent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...editForm,
-          grade_level: editForm.grade_level ? parseInt(editForm.grade_level) : null,
-          section: editForm.section ? parseInt(editForm.section) : null,
-          organization_id: editForm.organization_id ? parseInt(editForm.organization_id) : null,
-        }),
+      const response = await axios.post(`${API_BASE}?action=updateStudent`, {
+        ...editForm,
+        grade_level: editForm.grade_level
+          ? parseInt(editForm.grade_level)
+          : null,
+        section: editForm.section ? parseInt(editForm.section) : null,
+        organization_id: editForm.organization_id
+          ? parseInt(editForm.organization_id)
+          : null,
       });
-      const data = await res.json();
+      const data = response.data;
       if (data.success) {
         alert("Student updated successfully.");
         setShowEditForm(false);
@@ -304,67 +319,11 @@ const AdminLayout = () => {
         setEditError(data.message || "Failed to update student");
       }
     } catch (err) {
-      setEditError(err.message || "Network error");
+      setEditError(
+        err.response?.data?.message || err.message || "Network error"
+      );
     } finally {
       setEditSaving(false);
-    }
-  };
-
-  const disableStudent = async (student) => {
-    if (!window.confirm(`Are you sure you want to disable ${student.name}? This action can be undone by editing the student.`)) {
-      return;
-    }
-
-    try {
-      setDisablingStudent(true);
-      const res = await fetch(`${API_BASE}?action=disableStudent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: student.student_id
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Student disabled successfully.");
-        fetchStudents(); // Refresh the student list
-        fetchStudentStats(); // Refresh the statistics
-      } else {
-        alert("Failed to disable student: " + data.message);
-      }
-    } catch (err) {
-      alert("Error disabling student: " + err.message);
-    } finally {
-      setDisablingStudent(false);
-    }
-  };
-
-  const enableStudent = async (student) => {
-    if (!window.confirm(`Are you sure you want to enable ${student.name}?`)) {
-      return;
-    }
-
-    try {
-      setEnablingStudent(true);
-      const res = await fetch(`${API_BASE}?action=enableStudent`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: student.student_id
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert("Student enabled successfully.");
-        fetchStudents(); // Refresh the student list
-        fetchStudentStats(); // Refresh the statistics
-      } else {
-        alert("Failed to enable student: " + data.message);
-      }
-    } catch (err) {
-      alert("Error enabling student: " + err.message);
-    } finally {
-      setEnablingStudent(false);
     }
   };
 
@@ -399,11 +358,17 @@ const AdminLayout = () => {
                   onChange={(e) => setSearchText(e.target.value)}
                 />
               </div>
-              <button onClick={handleExportReports} className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <button
+                onClick={handleExportReports}
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
                 <Download className="h-4 w-4" />
                 <span>Export Reports</span>
               </button>
-              <button onClick={handleLogout} className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
                 <LogOut className="h-4 w-4" />
                 <span>Logout</span>
               </button>
@@ -413,72 +378,168 @@ const AdminLayout = () => {
       </header>
 
       <div className="w-full px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="flex gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-4">
-              <div className="flex items-center space-x-2 mb-4">
-                <LayoutDashboard className="h-5 w-5 text-indigo-600" />
-                <span className="text-sm font-semibold text-slate-900">
-                  Navigation
-                </span>
+          <aside
+            className={`${
+              sidebarCollapsed ? "w-16" : "w-80"
+            } transition-all duration-300 ease-in-out flex-shrink-0`}
+          >
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-4 sticky top-8">
+              <div className="flex items-center justify-between mb-4">
+                {!sidebarCollapsed && (
+                  <div className="flex items-center space-x-2">
+                    <LayoutDashboard className="h-5 w-5 text-indigo-600" />
+                    <span className="text-sm font-semibold text-slate-900">
+                      Navigation
+                    </span>
+                  </div>
+                )}
+                <button
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                  className="p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                >
+                  {sidebarCollapsed ? (
+                    <ChevronRight className="h-4 w-4 text-slate-600" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4 text-slate-600" />
+                  )}
+                </button>
               </div>
               <nav className="space-y-1">
-                <a className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group">
-                  <span className="flex items-center space-x-2 text-slate-700 group-hover:text-slate-900">
+                <a
+                  className={`flex items-center ${
+                    sidebarCollapsed
+                      ? "justify-center px-2"
+                      : "justify-between px-3"
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                >
+                  <span
+                    className={`flex items-center ${
+                      sidebarCollapsed ? "" : "space-x-2"
+                    } text-slate-700 group-hover:text-slate-900`}
+                  >
                     <Users className="h-4 w-4 text-indigo-600" />
-                    <span>Student Management</span>
+                    {!sidebarCollapsed && <span>Student Management</span>}
                   </span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  {!sidebarCollapsed && (
+                    <ChevronRight className="h-4 w-4 text-slate-400" />
+                  )}
                 </a>
-                <a className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group">
-                  <span className="flex items-center space-x-2 text-slate-700 group-hover:text-slate-900">
+                <a
+                  className={`flex items-center ${
+                    sidebarCollapsed
+                      ? "justify-center px-2"
+                      : "justify-between px-3"
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                >
+                  <span
+                    className={`flex items-center ${
+                      sidebarCollapsed ? "" : "space-x-2"
+                    } text-slate-700 group-hover:text-slate-900`}
+                  >
                     <UserPlus className="h-4 w-4 text-indigo-600" />
-                    <span>Teacher Management</span>
+                    {!sidebarCollapsed && <span>Teacher Management</span>}
                   </span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  {!sidebarCollapsed && (
+                    <ChevronRight className="h-4 w-4 text-slate-400" />
+                  )}
                 </a>
-                <a className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group">
-                  <span className="flex items-center space-x-2 text-slate-700 group-hover:text-slate-900">
+                <a
+                  className={`flex items-center ${
+                    sidebarCollapsed
+                      ? "justify-center px-2"
+                      : "justify-between px-3"
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                >
+                  <span
+                    className={`flex items-center ${
+                      sidebarCollapsed ? "" : "space-x-2"
+                    } text-slate-700 group-hover:text-slate-900`}
+                  >
                     <BookOpen className="h-4 w-4 text-indigo-600" />
-                    <span>Class Management</span>
+                    {!sidebarCollapsed && <span>Class Management</span>}
                   </span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  {!sidebarCollapsed && (
+                    <ChevronRight className="h-4 w-4 text-slate-400" />
+                  )}
                 </a>
-                <a className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group">
-                  <span className="flex items-center space-x-2 text-slate-700 group-hover:text-slate-900">
+                <a
+                  className={`flex items-center ${
+                    sidebarCollapsed
+                      ? "justify-center px-2"
+                      : "justify-between px-3"
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                >
+                  <span
+                    className={`flex items-center ${
+                      sidebarCollapsed ? "" : "space-x-2"
+                    } text-slate-700 group-hover:text-slate-900`}
+                  >
                     <ClipboardList className="h-4 w-4 text-indigo-600" />
-                    <span>Attendance Monitoring</span>
+                    {!sidebarCollapsed && <span>Attendance Monitoring</span>}
                   </span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  {!sidebarCollapsed && (
+                    <ChevronRight className="h-4 w-4 text-slate-400" />
+                  )}
                 </a>
-                <a className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group">
-                  <span className="flex items-center space-x-2 text-slate-700 group-hover:text-slate-900">
+                <a
+                  className={`flex items-center ${
+                    sidebarCollapsed
+                      ? "justify-center px-2"
+                      : "justify-between px-3"
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                >
+                  <span
+                    className={`flex items-center ${
+                      sidebarCollapsed ? "" : "space-x-2"
+                    } text-slate-700 group-hover:text-slate-900`}
+                  >
                     <Bell className="h-4 w-4 text-indigo-600" />
-                    <span>Parent Notification Logs</span>
+                    {!sidebarCollapsed && <span>Parent Notification Logs</span>}
                   </span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  {!sidebarCollapsed && (
+                    <ChevronRight className="h-4 w-4 text-slate-400" />
+                  )}
                 </a>
-                <a className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-slate-50 transition-colors group">
-                  <span className="flex items-center space-x-2 text-slate-700 group-hover:text-slate-900">
+                <a
+                  className={`flex items-center ${
+                    sidebarCollapsed
+                      ? "justify-center px-2"
+                      : "justify-between px-3"
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                >
+                  <span
+                    className={`flex items-center ${
+                      sidebarCollapsed ? "" : "space-x-2"
+                    } text-slate-700 group-hover:text-slate-900`}
+                  >
                     <Shield className="h-4 w-4 text-indigo-600" />
-                    <span>Staff Management</span>
+                    {!sidebarCollapsed && <span>Staff Management</span>}
                   </span>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+                  {!sidebarCollapsed && (
+                    <ChevronRight className="h-4 w-4 text-slate-400" />
+                  )}
                 </a>
               </nav>
             </div>
           </aside>
 
           {/* Main Content */}
-          <main className="lg:col-span-9 space-y-6">
+          <main className="flex-1 space-y-6">
             {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
               <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-slate-600">Total Students</p>
-                    <p className="text-2xl font-bold text-slate-900">1,250</p>
+                    <p className="text-2xl font-bold text-slate-900">
+                      {statsLoading
+                        ? "Loading..."
+                        : (
+                            studentStats.active + studentStats.inactive
+                          ).toLocaleString()}
+                    </p>
                   </div>
                   <Users className="h-8 w-8 text-indigo-600" />
                 </div>
@@ -524,10 +585,19 @@ const AdminLayout = () => {
                   </h2>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button onClick={() => openForm("student")} className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow">
+                  <button
+                    onClick={() => openForm("student")}
+                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow"
+                  >
                     Register New Student
                   </button>
-                  <button onClick={() => { fetchStudentStats(); fetchStudents(); }} className="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50">
+                  <button
+                    onClick={() => {
+                      fetchStudentStats();
+                      fetchStudents();
+                    }}
+                    className="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  >
                     <RefreshCw className="h-4 w-4" />
                   </button>
                 </div>
@@ -537,13 +607,17 @@ const AdminLayout = () => {
                   <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
                     <p className="text-sm text-slate-600">Active</p>
                     <p className="text-xl font-bold text-slate-900">
-                      {statsLoading ? "Loading..." : studentStats.active.toLocaleString()}
+                      {statsLoading
+                        ? "Loading..."
+                        : studentStats.active.toLocaleString()}
                     </p>
                   </div>
                   <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
                     <p className="text-sm text-slate-600">Inactive</p>
                     <p className="text-xl font-bold text-slate-900">
-                      {statsLoading ? "Loading..." : studentStats.inactive.toLocaleString()}
+                      {statsLoading
+                        ? "Loading..."
+                        : studentStats.inactive.toLocaleString()}
                     </p>
                   </div>
                   <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
@@ -551,7 +625,9 @@ const AdminLayout = () => {
                       With Attendance Issues
                     </p>
                     <p className="text-xl font-bold text-slate-900">
-                      {statsLoading ? "Loading..." : studentStats.withAttendanceIssues.toLocaleString()}
+                      {statsLoading
+                        ? "Loading..."
+                        : studentStats.withAttendanceIssues.toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -579,73 +655,59 @@ const AdminLayout = () => {
                     <tbody className="bg-white divide-y divide-slate-200">
                       {studentsLoading ? (
                         <tr>
-                          <td className="px-6 py-4 text-sm text-slate-600" colSpan="5">
+                          <td
+                            className="px-6 py-4 text-sm text-slate-600"
+                            colSpan="5"
+                          >
                             Loading students...
                           </td>
                         </tr>
                       ) : filteredStudents.length === 0 ? (
                         <tr>
-                          <td className="px-6 py-4 text-sm text-slate-600" colSpan="5">
+                          <td
+                            className="px-6 py-4 text-sm text-slate-600"
+                            colSpan="5"
+                          >
                             No students found.
                           </td>
                         </tr>
                       ) : (
                         filteredStudents.map((s) => (
-                        <tr key={s.name} className="hover:bg-slate-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
-                            {s.name}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                            {s.section_display}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                            {s.guardian}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {s.status_display === "Active" ? (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-emerald-600 bg-emerald-50 border-emerald-200">
-                                <CheckCircle className="h-4 w-4" />
-                                <span className="ml-1">Active</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-rose-700 bg-rose-50 border-rose-200">
-                                <XCircle className="h-4 w-4" />
-                                <span className="ml-1">Inactive</span>
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                            <div className="flex items-center space-x-2">
-                              <button 
-                                onClick={() => openEditForm(s)} 
-                                className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
-                                title="Edit Student"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </button>
-                              {s.status === 'active' && (
-                                <button 
-                                  onClick={() => disableStudent(s)} 
-                                  disabled={disablingStudent}
-                                  className="text-red-600 hover:text-red-800 p-1 rounded hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  title="Disable Student"
-                                >
-                                  <UserX className="h-4 w-4" />
-                                </button>
+                          <tr key={s.name} className="hover:bg-slate-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                              {s.name}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                              {s.section_display}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                              {s.guardian}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {s.status === "active" ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-emerald-600 bg-emerald-50 border-emerald-200">
+                                  <CheckCircle className="h-4 w-4" />
+                                  <span className="ml-1">Active</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-rose-700 bg-rose-50 border-rose-200">
+                                  <XCircle className="h-4 w-4" />
+                                  <span className="ml-1">Disabled</span>
+                                </span>
                               )}
-                              {s.status === 'inactive' && (
-                                <button 
-                                  onClick={() => enableStudent(s)} 
-                                  disabled={enablingStudent}
-                                  className="text-green-600 hover:text-green-800 p-1 rounded hover:bg-green-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                  title="Enable Student"
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                              <div className="flex items-center space-x-2 pl-3">
+                                <button
+                                  onClick={() => openEditForm(s)}
+                                  className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50"
+                                  title="Edit Student"
                                 >
-                                  <UserCheck className="h-4 w-4" />
+                                  <Edit className="h-4 w-4" />
                                 </button>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
+                              </div>
+                            </td>
+                          </tr>
                         ))
                       )}
                     </tbody>
@@ -667,7 +729,10 @@ const AdminLayout = () => {
                   </h2>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button onClick={() => openForm("teacher")} className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow">
+                  <button
+                    onClick={() => openForm("teacher")}
+                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow"
+                  >
                     Request New Teacher
                   </button>
                 </div>
@@ -813,7 +878,10 @@ const AdminLayout = () => {
                   </h2>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <button onClick={handleGenerateReports} className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow">
+                  <button
+                    onClick={handleGenerateReports}
+                    className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-xl text-sm font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow"
+                  >
                     Generate Reports
                   </button>
                 </div>
@@ -1037,169 +1105,310 @@ const AdminLayout = () => {
       </div>
 
       {showForm && (
-        <div onClick={closeForm} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200">
+        <div
+          onClick={closeForm}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200"
+          >
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <h3 className="text-lg font-semibold text-slate-900">
-                {formType === "student" ? "Register New Student" : "Request New Teacher"}
+                {formType === "student"
+                  ? "Register New Student"
+                  : "Request New Teacher"}
               </h3>
-              <button onClick={closeForm} className="text-slate-400 hover:text-slate-600">
+              <button
+                onClick={closeForm}
+                className="text-slate-400 hover:text-slate-600"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
             {formType === "student" ? (
-            <form onSubmit={submitStudent} className="px-6 py-5 space-y-4">
-              {studentError && (
-                <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">{studentError}</div>
-              )}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Roll Number</label>
-                  <input name="roll_number" value={studentForm.roll_number} onChange={handleStudentChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+              <form onSubmit={submitStudent} className="px-6 py-5 space-y-4">
+                {studentError && (
+                  <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">
+                    {studentError}
+                  </div>
+                )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Roll Number
+                    </label>
+                    <input
+                      name="roll_number"
+                      value={studentForm.roll_number}
+                      onChange={handleStudentChange}
+                      required
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Enrollment Date
+                    </label>
+                    <input
+                      type="date"
+                      name="enrollment_date"
+                      value={studentForm.enrollment_date}
+                      onChange={handleStudentChange}
+                      required
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      First Name
+                    </label>
+                    <input
+                      name="first_name"
+                      value={studentForm.first_name}
+                      onChange={handleStudentChange}
+                      required
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Last Name
+                    </label>
+                    <input
+                      name="last_name"
+                      value={studentForm.last_name}
+                      onChange={handleStudentChange}
+                      required
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Middle Name
+                    </label>
+                    <input
+                      name="middle_name"
+                      value={studentForm.middle_name}
+                      onChange={handleStudentChange}
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={studentForm.email}
+                      onChange={handleStudentChange}
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Phone
+                    </label>
+                    <input
+                      name="phone_number"
+                      value={studentForm.phone_number}
+                      onChange={handleStudentChange}
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Date of Birth
+                    </label>
+                    <input
+                      type="date"
+                      name="date_of_birth"
+                      value={studentForm.date_of_birth}
+                      onChange={handleStudentChange}
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Gender
+                    </label>
+                    <select
+                      name="gender"
+                      value={studentForm.gender}
+                      onChange={handleStudentChange}
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Address
+                    </label>
+                    <input
+                      name="address"
+                      value={studentForm.address}
+                      onChange={handleStudentChange}
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Grade Level ID
+                    </label>
+                    <input
+                      type="number"
+                      name="grade_level"
+                      value={studentForm.grade_level}
+                      onChange={handleStudentChange}
+                      required
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Section ID
+                    </label>
+                    <input
+                      type="number"
+                      name="section"
+                      value={studentForm.section}
+                      onChange={handleStudentChange}
+                      required
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Organization ID (optional)
+                    </label>
+                    <input
+                      type="number"
+                      name="organization_id"
+                      value={studentForm.organization_id}
+                      onChange={handleStudentChange}
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Enrollment Date</label>
-                  <input type="date" name="enrollment_date" value={studentForm.enrollment_date} onChange={handleStudentChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                <div className="flex items-center justify-end space-x-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    disabled={studentSaving}
+                    type="submit"
+                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow"
+                  >
+                    {studentSaving ? "Saving..." : "Submit"}
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
-                  <input name="first_name" value={studentForm.first_name} onChange={handleStudentChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
-                  <input name="last_name" value={studentForm.last_name} onChange={handleStudentChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Middle Name</label>
-                  <input name="middle_name" value={studentForm.middle_name} onChange={handleStudentChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <input type="email" name="email" value={studentForm.email} onChange={handleStudentChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                  <input name="phone_number" value={studentForm.phone_number} onChange={handleStudentChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Date of Birth</label>
-                  <input type="date" name="date_of_birth" value={studentForm.date_of_birth} onChange={handleStudentChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Gender</label>
-                  <select name="gender" value={studentForm.gender} onChange={handleStudentChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="">Select</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
-                  <input name="address" value={studentForm.address} onChange={handleStudentChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Grade Level ID</label>
-                  <input type="number" name="grade_level" value={studentForm.grade_level} onChange={handleStudentChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Section ID</label>
-                  <input type="number" name="section" value={studentForm.section} onChange={handleStudentChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Organization ID (optional)</label>
-                  <input type="number" name="organization_id" value={studentForm.organization_id} onChange={handleStudentChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
-                </div>
-              </div>
-              <div className="flex items-center justify-end space-x-2 pt-2">
-                <button type="button" onClick={closeForm} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50">
-                  Cancel
-                </button>
-                <button disabled={studentSaving} type="submit" className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow">
-                  {studentSaving ? "Saving..." : "Submit"}
-                </button>
-              </div>
-            </form>
+              </form>
             ) : (
-            <form onSubmit={handleFormSubmit} className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                <input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  required
-                  type="text"
-                  className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g. Juan Dela Cruz"
-                />
-              </div>
-
-              {formType === "student" && (
+              <form onSubmit={handleFormSubmit} className="px-6 py-5 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Section</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Full Name
+                  </label>
                   <input
-                    name="section"
-                    value={formData.section}
+                    name="name"
+                    value={formData.name}
                     onChange={handleInputChange}
                     required
                     type="text"
                     className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g. Grade 10 - Ruby"
+                    placeholder="e.g. Juan Dela Cruz"
                   />
                 </div>
-              )}
 
-              {formType === "student" && (
+                {formType === "student" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Section
+                    </label>
+                    <input
+                      name="section"
+                      value={formData.section}
+                      onChange={handleInputChange}
+                      required
+                      type="text"
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g. Grade 10 - Ruby"
+                    />
+                  </div>
+                )}
+
+                {formType === "student" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Guardian Contact
+                    </label>
+                    <input
+                      name="guardian"
+                      value={formData.guardian}
+                      onChange={handleInputChange}
+                      type="text"
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g. 09171234567"
+                    />
+                  </div>
+                )}
+
+                {formType === "teacher" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Subject
+                    </label>
+                    <input
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      required
+                      type="text"
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="e.g. Mathematics"
+                    />
+                  </div>
+                )}
+
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Guardian Contact</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Phone
+                  </label>
                   <input
-                    name="guardian"
-                    value={formData.guardian}
+                    name="phone"
+                    value={formData.phone}
                     onChange={handleInputChange}
                     type="text"
                     className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g. 09171234567"
+                    placeholder="e.g. 09181234567"
                   />
                 </div>
-              )}
 
-              {formType === "teacher" && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Subject</label>
-                  <input
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    required
-                    type="text"
-                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g. Mathematics"
-                  />
+                <div className="flex items-center justify-end space-x-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow"
+                  >
+                    Submit
+                  </button>
                 </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                <input
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  type="text"
-                  className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="e.g. 09181234567"
-                />
-              </div>
-
-              <div className="flex items-center justify-end space-x-2 pt-2">
-                <button type="button" onClick={closeForm} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50">
-                  Cancel
-                </button>
-                <button type="submit" className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow">
-                  Submit
-                </button>
-              </div>
-            </form>
+              </form>
             )}
           </div>
         </div>
@@ -1207,56 +1416,137 @@ const AdminLayout = () => {
 
       {/* Edit Student Modal */}
       {showEditForm && (
-        <div onClick={closeEditForm} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200">
+        <div
+          onClick={closeEditForm}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg mx-4 bg-white rounded-2xl shadow-2xl border border-slate-200"
+          >
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <h3 className="text-lg font-semibold text-slate-900">
                 Edit Student Information
               </h3>
-              <button onClick={closeEditForm} className="text-slate-400 hover:text-slate-600">
+              <button
+                onClick={closeEditForm}
+                className="text-slate-400 hover:text-slate-600"
+              >
                 <X className="h-5 w-5" />
               </button>
             </div>
             <form onSubmit={submitEdit} className="px-6 py-5 space-y-4">
               {editError && (
-                <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">{editError}</div>
+                <div className="text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">
+                  {editError}
+                </div>
               )}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Roll Number</label>
-                  <input name="roll_number" value={editForm.roll_number} onChange={handleEditChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Roll Number
+                  </label>
+                  <input
+                    name="roll_number"
+                    value={editForm.roll_number}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Enrollment Date</label>
-                  <input type="date" name="enrollment_date" value={editForm.enrollment_date} onChange={handleEditChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Enrollment Date
+                  </label>
+                  <input
+                    type="date"
+                    name="enrollment_date"
+                    value={editForm.enrollment_date}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
-                  <input name="first_name" value={editForm.first_name} onChange={handleEditChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    First Name
+                  </label>
+                  <input
+                    name="first_name"
+                    value={editForm.first_name}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
-                  <input name="last_name" value={editForm.last_name} onChange={handleEditChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Last Name
+                  </label>
+                  <input
+                    name="last_name"
+                    value={editForm.last_name}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Middle Name</label>
-                  <input name="middle_name" value={editForm.middle_name} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Middle Name
+                  </label>
+                  <input
+                    name="middle_name"
+                    value={editForm.middle_name}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                  <input type="email" name="email" value={editForm.email} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={editForm.email}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Phone</label>
-                  <input name="phone_number" value={editForm.phone_number} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Phone
+                  </label>
+                  <input
+                    name="phone_number"
+                    value={editForm.phone_number}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Date of Birth</label>
-                  <input type="date" name="date_of_birth" value={editForm.date_of_birth} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    name="date_of_birth"
+                    value={editForm.date_of_birth}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Gender</label>
-                  <select name="gender" value={editForm.gender} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Gender
+                  </label>
+                  <select
+                    name="gender"
+                    value={editForm.gender}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
                     <option value="">Select</option>
                     <option value="male">Male</option>
                     <option value="female">Female</option>
@@ -1264,8 +1554,15 @@ const AdminLayout = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                  <select name="status" value={editForm.status} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={editForm.status}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
                     <option value="">Select</option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -1274,27 +1571,68 @@ const AdminLayout = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Address</label>
-                  <input name="address" value={editForm.address} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Address
+                  </label>
+                  <input
+                    name="address"
+                    value={editForm.address}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Grade Level ID</label>
-                  <input type="number" name="grade_level" value={editForm.grade_level} onChange={handleEditChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Grade Level ID
+                  </label>
+                  <input
+                    type="number"
+                    name="grade_level"
+                    value={editForm.grade_level}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Section ID</label>
-                  <input type="number" name="section" value={editForm.section} onChange={handleEditChange} required className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Section ID
+                  </label>
+                  <input
+                    type="number"
+                    name="section"
+                    value={editForm.section}
+                    onChange={handleEditChange}
+                    required
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Organization ID (optional)</label>
-                  <input type="number" name="organization_id" value={editForm.organization_id} onChange={handleEditChange} className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Organization ID (optional)
+                  </label>
+                  <input
+                    type="number"
+                    name="organization_id"
+                    value={editForm.organization_id}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
               </div>
               <div className="flex items-center justify-end space-x-2 pt-2">
-                <button type="button" onClick={closeEditForm} className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50">
+                <button
+                  type="button"
+                  onClick={closeEditForm}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50"
+                >
                   Cancel
                 </button>
-                <button disabled={editSaving} type="submit" className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow">
+                <button
+                  disabled={editSaving}
+                  type="submit"
+                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow"
+                >
                   {editSaving ? "Updating..." : "Update Student"}
                 </button>
               </div>

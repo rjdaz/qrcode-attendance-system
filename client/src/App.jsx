@@ -55,7 +55,7 @@ function App() {
           path="/adminDashboard"
           element={
             <RequireAuth>
-              <AdminDashboard />
+              <AdminDashboard apiUrl={apiUrl} setLoginStatus={setLoginStatus} setName={setName} />
             </RequireAuth>
           }
         />

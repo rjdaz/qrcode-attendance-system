@@ -27,13 +27,14 @@ import {
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-const AdminLayout = () => {
+const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
   // Simple beginner-friendly state and data
   const [searchText, setSearchText] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [formType, setFormType] = useState("student"); // "student" | "teacher"
-  const API_BASE =
-    "http://localhost/qrcode-attendance-system/server/connection/api.php";
+  const [selectedManagement, setSelectedManagement] = useState("student"); // "student" | "teacher" | "class" | "attendance" | "notifications" | "staff"
+  // const apiUrl =
+  //   "http://localhost/qrcode-attendance-system/server/connection/api.php";
   const [studentForm, setStudentForm] = useState({
     roll_number: "",
     first_name: "",
@@ -93,7 +94,7 @@ const AdminLayout = () => {
   const fetchStudents = async () => {
     try {
       setStudentsLoading(true);
-      const response = await axios.get(`${API_BASE}?action=getStudents`);
+      const response = await axios.get(`${apiUrl}getStudents`);
       const data = response.data;
       if (data.success) {
         setStudents(data.data);
@@ -113,7 +114,7 @@ const AdminLayout = () => {
   const fetchStudentStats = async () => {
     try {
       setStatsLoading(true);
-      const response = await axios.get(`${API_BASE}?action=getStudentStats`);
+      const response = await axios.get(`${apiUrl}getStudentStats`);
       const data = response.data;
       if (data.success) {
         setStudentStats(data.data);
@@ -125,6 +126,12 @@ const AdminLayout = () => {
     } finally {
       setStatsLoading(false);
     }
+  };
+
+  // handle management selection
+  const handleManagementSelect = (type) => {
+    setSelectedManagement(type);
+    setSearchText("");
   };
 
   // Load student data on component mount
@@ -152,12 +159,9 @@ const AdminLayout = () => {
   };
 
   const handleLogout = () => {
-    // Simple beginner-style logout: clear a simple key and redirect
-    try {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-    } catch (e) {}
-    window.location.href = "/login";
+    setLoginStatus(false);
+    setName("");
+    navigate("/login");
   };
 
   const openForm = (type) => {
@@ -266,7 +270,7 @@ const AdminLayout = () => {
     setStudentError("");
     setStudentSaving(true);
     try {
-      const response = await axios.post(`${API_BASE}?action=registerStudent`, {
+      const response = await axios.post(`${apiUrl}registerStudent`, {
         ...studentForm,
         grade_level: studentForm.grade_level
           ? parseInt(studentForm.grade_level)
@@ -299,7 +303,7 @@ const AdminLayout = () => {
     setEditError("");
     setEditSaving(true);
     try {
-      const response = await axios.post(`${API_BASE}?action=updateStudent`, {
+      const response = await axios.post(`${apiUrl}updateStudent`, {
         ...editForm,
         grade_level: editForm.grade_level
           ? parseInt(editForm.grade_level)
@@ -407,12 +411,15 @@ const AdminLayout = () => {
                 </button>
               </div>
               <nav className="space-y-1">
-                <a
-                  className={`flex items-center ${
+                <button
+                  onClick={() => handleManagementSelect("student")}
+                  className={`flex items-center w-full ${
                     sidebarCollapsed
                       ? "justify-center px-2"
                       : "justify-between px-3"
-                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group ${
+                    selectedManagement === "student" ? "bg-slate-200" : ""
+                  }`}
                 >
                   <span
                     className={`flex items-center ${
@@ -425,13 +432,16 @@ const AdminLayout = () => {
                   {!sidebarCollapsed && (
                     <ChevronRight className="h-4 w-4 text-slate-400" />
                   )}
-                </a>
-                <a
-                  className={`flex items-center ${
+                </button>
+                <button
+                  onClick={() => handleManagementSelect("teacher")}
+                  className={`flex items-center w-full ${
                     sidebarCollapsed
                       ? "justify-center px-2"
                       : "justify-between px-3"
-                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group ${
+                    selectedManagement === "teacher" ? "bg-slate-200" : ""
+                  }`}
                 >
                   <span
                     className={`flex items-center ${
@@ -444,16 +454,19 @@ const AdminLayout = () => {
                   {!sidebarCollapsed && (
                     <ChevronRight className="h-4 w-4 text-slate-400" />
                   )}
-                </a>
-                <a
-                  className={`flex items-center ${
+                </button>
+                <button
+                  onClick={() => handleManagementSelect("class")}
+                  className={`flex items-center w-full ${
                     sidebarCollapsed
                       ? "justify-center px-2"
                       : "justify-between px-3"
-                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group ${
+                    selectedManagement === "class" ? "bg-slate-200" : ""
+                  }`}
                 >
                   <span
-                    className={`flex items-center ${
+                    className={`flex items-center w-full ${
                       sidebarCollapsed ? "" : "space-x-2"
                     } text-slate-700 group-hover:text-slate-900`}
                   >
@@ -463,13 +476,16 @@ const AdminLayout = () => {
                   {!sidebarCollapsed && (
                     <ChevronRight className="h-4 w-4 text-slate-400" />
                   )}
-                </a>
-                <a
-                  className={`flex items-center ${
+                </button>
+                <button
+                  onClick={() => handleManagementSelect("attendance")}
+                  className={`flex items-center w-full ${
                     sidebarCollapsed
                       ? "justify-center px-2"
                       : "justify-between px-3"
-                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group ${
+                    selectedManagement === "attendance" ? "bg-slate-200" : ""
+                  }`}
                 >
                   <span
                     className={`flex items-center ${
@@ -482,13 +498,16 @@ const AdminLayout = () => {
                   {!sidebarCollapsed && (
                     <ChevronRight className="h-4 w-4 text-slate-400" />
                   )}
-                </a>
-                <a
-                  className={`flex items-center ${
+                </button>
+                <button
+                  onClick={() => handleManagementSelect("notification")}
+                  className={`flex items-center w-full ${
                     sidebarCollapsed
                       ? "justify-center px-2"
                       : "justify-between px-3"
-                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group ${
+                    selectedManagement === "notification" ? "bg-slate-200" : ""
+                  }`}
                 >
                   <span
                     className={`flex items-center ${
@@ -501,13 +520,16 @@ const AdminLayout = () => {
                   {!sidebarCollapsed && (
                     <ChevronRight className="h-4 w-4 text-slate-400" />
                   )}
-                </a>
-                <a
-                  className={`flex items-center ${
+                </button>
+                <button
+                  onClick={() => handleManagementSelect("staff")}
+                  className={`flex items-center w-full ${
                     sidebarCollapsed
                       ? "justify-center px-2"
                       : "justify-between px-3"
-                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group`}
+                  } py-2 rounded-xl hover:bg-slate-50 transition-colors group ${
+                    selectedManagement === "staff" ? "bg-slate-200" : ""
+                  }`}
                 >
                   <span
                     className={`flex items-center ${
@@ -520,7 +542,7 @@ const AdminLayout = () => {
                   {!sidebarCollapsed && (
                     <ChevronRight className="h-4 w-4 text-slate-400" />
                   )}
-                </a>
+                </button>
               </nav>
             </div>
           </aside>
@@ -576,7 +598,11 @@ const AdminLayout = () => {
             </div>
 
             {/* Student Management */}
-            <section className="bg-white rounded-2xl shadow-lg border border-slate-200">
+            <section
+              className={`bg-white rounded-2xl shadow-lg border border-slate-200 ${
+                selectedManagement === "student" ? "block" : "hidden"
+              } `}
+            >
               <div className="p-6 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Users className="h-5 w-5 text-indigo-600" />
@@ -720,7 +746,11 @@ const AdminLayout = () => {
             </section>
 
             {/* Teacher Management */}
-            <section className="bg-white rounded-2xl shadow-lg border border-slate-200">
+            <section
+              className={`bg-white rounded-2xl shadow-lg border border-slate-200 ${
+                selectedManagement === "teacher" ? "block" : "hidden"
+              }`}
+            >
               <div className="p-6 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <UserPlus className="h-5 w-5 text-indigo-600" />
@@ -787,7 +817,11 @@ const AdminLayout = () => {
             </section>
 
             {/* Class Management */}
-            <section className="bg-white rounded-2xl shadow-lg border border-slate-200">
+            <section
+              className={`bg-white rounded-2xl shadow-lg border border-slate-200 ${
+                selectedManagement === "class" ? "block" : "hidden"
+              }`}
+            >
               <div className="p-6 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <BookOpen className="h-5 w-5 text-indigo-600" />
@@ -869,7 +903,11 @@ const AdminLayout = () => {
             </section>
 
             {/* Attendance Monitoring */}
-            <section className="bg-white rounded-2xl shadow-lg border border-slate-200">
+            <section
+              className={`bg-white rounded-2xl shadow-lg border border-slate-200 ${
+                selectedManagement === "attendance" ? "block" : "hidden"
+              }`}
+            >
               <div className="p-6 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <ClipboardList className="h-5 w-5 text-indigo-600" />
@@ -973,7 +1011,11 @@ const AdminLayout = () => {
             </section>
 
             {/* Parent Notification Logs */}
-            <section className="bg-white rounded-2xl shadow-lg border border-slate-200">
+            <section
+              className={`bg-white rounded-2xl shadow-lg border border-slate-200 ${
+                selectedManagement === "notification" ? "block" : "hidden"
+              }`}
+            >
               <div className="p-6 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Bell className="h-5 w-5 text-indigo-600" />
@@ -1039,7 +1081,11 @@ const AdminLayout = () => {
             </section>
 
             {/* Staff Management */}
-            <section className="bg-white rounded-2xl shadow-lg border border-slate-200">
+            <section
+              className={`bg-white rounded-2xl shadow-lg border border-slate-200 ${
+                selectedManagement === "staff" ? "block" : "hidden"
+              }`}
+            >
               <div className="p-6 border-b border-slate-200 flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <Shield className="h-5 w-5 text-indigo-600" />

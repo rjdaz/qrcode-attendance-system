@@ -4,9 +4,9 @@
     $data = json_decode(file_get_contents("php://input"), true);
 
     $employeeNo = $data['employeeNo'];
+    date_default_timezone_set('Asia/Manila');
     $today = date('D');
     $likely = '%' . $today . '%';
-
     
     $getIdNoStmt = $conn->prepare("SELECT users_id FROM users WHERE employee_no = ?");
     $getIdNoStmt->bind_param("s", $employeeNo);
@@ -29,6 +29,7 @@
     } else {
         echo json_encode(['success' => false, 'message' => 'No classes found']);
     }
-
+  
+    
   }
 ?>

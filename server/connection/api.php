@@ -4,13 +4,13 @@
 
   // files
   include '../components/login/login.php';
-  include '../components/getClassesToday.php';
-  include '../components/registerStudent.php';
-  include '../components/getStudentStats.php';
-  include '../components/getStudents.php';
-  include '../components/updateStudent.php';
-  include '../components/disableStudent.php';
-  include '../components/enableStudent.php';
+  include '../components/teacher_dashboard/getClassesToday.php';
+  include '../components/admin_dashboard/student/registerStudent.php';
+  include '../components/admin_dashboard/student/getStudentStats.php';
+  include '../components/admin_dashboard/student/getStudents.php';
+  include '../components/admin_dashboard/student/updateStudent.php';
+  include '../components/admin_dashboard/student/disableStudent.php';
+  include '../components/admin_dashboard/student/enableStudent.php';
 
   $action = isset($_GET['action']) ? $_GET['action'] : '';
 

@@ -110,6 +110,22 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
     }
   };
 
+  // // Auto-increment roll number based on grade level and section
+  // const autoIncrementRollNumber = (gradeLevel, section) => {
+  //   const filtered = students.filter(
+  //     (s) =>
+  //       s.grade_level === parseInt(gradeLevel) &&
+  //       s.section === parseInt(section) &&
+  //       s.roll_number
+  //   );
+
+  //   if (filtered.length === 0) return 1;
+  //   const maxRoll = Math.max(
+  //     ...filtered.map((s) => parseInt(s.roll_number))
+  //   );
+  //   return maxRoll + 1;
+  // };
+
   // Fetch student statistics from database
   const fetchStudentStats = async () => {
     try {
@@ -1186,7 +1202,7 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                     </label>
                     <input
                       name="roll_number"
-                      value={studentForm.roll_number}
+                      value={studentForm.roll_number} 
                       onChange={handleStudentChange}
                       required
                       className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

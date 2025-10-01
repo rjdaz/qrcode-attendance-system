@@ -1,10 +1,17 @@
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Login from "./components/auth/Login";
 import Dashboard from "./components/dashboard/Dashboard";
 import History from "./components/history/attendanceHistory";
 import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendance";
+//const Scanner = lazy(() => import("./components/scanners/qrscanners"));
 import Scanner from "./components/scanners/qrscanners";
 import AdminDashboard from "./components/AdminDashboard/AdminLayout";
 
@@ -35,81 +42,86 @@ function App() {
   };
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route
-          path="/login"
-          element={
-            <Login
-              apiUrl={apiUrl}
-              loginStatus={loginStatus}
-              setLoginStatus={setLoginStatus}
-              name={name}
-              setName={setName}
-              setEmployeeNo={setEmployeeNo}
-            />
-          }
-        />
-        <Route
-          path="/adminDashboard"
-          element={
-            <RequireAuth>
-              <AdminDashboard apiUrl={apiUrl} setLoginStatus={setLoginStatus} setName={setName} />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <RequireAuth>
-              <Dashboard
+    <Router>
+      <Suspense fallback={<div>Loading scanner...</div>}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route
+            path="/login"
+            element={
+              <Login
                 apiUrl={apiUrl}
                 loginStatus={loginStatus}
                 setLoginStatus={setLoginStatus}
                 name={name}
                 setName={setName}
-                employeeNo={employeeNo}
-                setSubId={setSubId}
+                setEmployeeNo={setEmployeeNo}
               />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/history"
-          element={
-            <RequireAuth>
-              <History />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/reports"
-          element={
-            <RequireAuth>
-              <Reports />
-            </RequireAuth>
-          }
-          
-        />
-        <Route
-          path="/attendance"
-          element={
-            <RequireAuth>
-              <Attendance />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/scanner/:subId"
-          element={
-            <RequireAuth>
-              <Scanner subId={subId} />
-            </RequireAuth>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+            }
+          />
+          <Route
+            path="/adminDashboard"
+            element={
+              <RequireAuth>
+                <AdminDashboard
+                  apiUrl={apiUrl}
+                  setLoginStatus={setLoginStatus}
+                  setName={setName}
+                />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <RequireAuth>
+                <Dashboard
+                  apiUrl={apiUrl}
+                  loginStatus={loginStatus}
+                  setLoginStatus={setLoginStatus}
+                  name={name}
+                  setName={setName}
+                  employeeNo={employeeNo}
+                  setSubId={setSubId}
+                />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <RequireAuth>
+                <History />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <RequireAuth>
+                <Reports />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/attendance"
+            element={
+              <RequireAuth>
+                <Attendance />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/scanner/:subId?"
+            element={
+              <RequireAuth>
+                <Scanner subId={subId} apiUrl={apiUrl} />
+              </RequireAuth>
+            }
+          />
+        </Routes>
+      </Suspense>
+    </Router>
   );
 }
 

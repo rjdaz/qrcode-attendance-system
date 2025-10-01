@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 23, 2025 at 01:58 PM
+-- Generation Time: Oct 01, 2025 at 07:26 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -104,6 +104,7 @@ INSERT INTO `organization` (`organization_id`, `unit_name`, `description`, `crea
 
 CREATE TABLE `section` (
   `section_id` int(11) NOT NULL,
+  `section_role` varchar(255) DEFAULT NULL,
   `section_name` varchar(100) NOT NULL,
   `grade_level_id` int(11) DEFAULT NULL,
   `adviser_teacher_id` int(11) DEFAULT NULL,
@@ -116,9 +117,9 @@ CREATE TABLE `section` (
 -- Dumping data for table `section`
 --
 
-INSERT INTO `section` (`section_id`, `section_name`, `grade_level_id`, `adviser_teacher_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Curie', 1, 5, 'active', '2025-09-20 00:10:42', '2025-09-20 00:10:42'),
-(2, 'Integrity', 4, 5, 'active', '2025-09-20 00:16:59', '2025-09-20 00:16:59');
+INSERT INTO `section` (`section_id`, `section_role`, `section_name`, `grade_level_id`, `adviser_teacher_id`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Curie-Grade 7', 'Curie', 1, 5, 'active', '2025-09-20 00:10:42', '2025-10-02 00:30:43'),
+(2, 'Integrity-Grade 10', 'Integrity', 4, 5, 'active', '2025-09-20 00:16:59', '2025-10-02 00:30:43');
 
 -- --------------------------------------------------------
 
@@ -146,6 +147,13 @@ CREATE TABLE `students` (
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `students`
+--
+
+INSERT INTO `students` (`student_id`, `roll_number`, `first_name`, `last_name`, `middle_name`, `email`, `phone_number`, `date_of_birth`, `gender`, `address`, `enrollment_date`, `status`, `grade_level`, `section`, `organization_id`, `created_at`, `updated_at`) VALUES
+(1, 'S202501', 'Ryan Jake', 'Daz', 'Guiriba', 'daz@gmail.com', '09123456789', '1995-10-22', 'male', 'P1 It-ba Manito Albay', '2025-09-29', 'active', 1, 1, 1, '2025-09-29 14:13:42', '2025-09-29 14:13:42');
+
 -- --------------------------------------------------------
 
 --
@@ -157,7 +165,7 @@ CREATE TABLE `subjects` (
   `subject_code` varchar(50) NOT NULL,
   `subject_name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `days` enum('Mon, Tue','Tue','Wed','Thu','Fri') NOT NULL,
+  `days` enum('Mon, Tue, Thu','Tue','Wed','Thu','Fri') NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
   `room_name` varchar(255) NOT NULL,
@@ -172,8 +180,8 @@ CREATE TABLE `subjects` (
 --
 
 INSERT INTO `subjects` (`subject_id`, `subject_code`, `subject_name`, `description`, `days`, `start_time`, `end_time`, `room_name`, `teacher_id`, `department_id`, `created_at`, `updated_at`) VALUES
-(1, 'ENG10INT', 'English', 'English', 'Tue', '07:00:00', '08:00:00', 'Integrity', 5, 3, '2025-09-21 22:51:21', '2025-09-23 17:54:02'),
-(3, 'ENG10CUR', 'English', 'English', 'Mon, Tue', '09:00:00', '10:00:00', 'Curie', 5, 3, '2025-09-23 18:58:28', '2025-09-23 19:11:06');
+(1, 'ENG10INT', 'English', 'English', 'Wed', '07:00:00', '08:00:00', 'Integrity', 5, 3, '2025-09-21 22:51:21', '2025-10-02 01:07:19'),
+(3, 'ENG10CUR', 'English', 'English', 'Thu', '09:00:00', '10:00:00', 'Curie', 5, 3, '2025-09-23 18:58:28', '2025-10-02 01:08:15');
 
 -- --------------------------------------------------------
 
@@ -207,8 +215,8 @@ INSERT INTO `users` (`users_id`, `employee_no`, `username`, `password`, `first_n
 (1, 'S250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-23 18:14:26', '2025-09-18 22:58:56', '2025-09-23 18:14:26', 'active'),
 (2, 'S250002', 'sysAdmSupport01', '$2y$10$Rytkpm9LZAHP0iXrOu5tCeL2qRHS64UOiFAL0am0gEMoj37KIm4jm', 'Joyce Mariane', 'Dagsil', 'joycemariane@gmail.com', '09171234567', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:11:48', '2025-09-20 00:40:46', 'active'),
 (3, 'S250003', 'sysAdmSupport02', '$2y$10$UeJlioPdNMo4GdyvGsLnfuAu3PbpOzEcWGd.h5ZOjLJ/7G2pfd92i', 'Roince', 'Jumao-as', 'roince@gmail.com', '09123456789', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:16:43', '2025-09-20 00:41:02', 'active'),
-(4, 'S250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-09-19 00:28:34', '2025-09-18 23:28:16', '2025-09-20 00:41:26', 'active'),
-(5, 'S250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-09-23 19:49:47', '2025-09-18 23:40:56', '2025-09-23 19:49:47', 'active');
+(4, 'S250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-10-02 01:15:56', '2025-09-18 23:28:16', '2025-10-02 01:15:56', 'active'),
+(5, 'S250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-10-02 01:11:39', '2025-09-18 23:40:56', '2025-10-02 01:11:39', 'active');
 
 --
 -- Indexes for dumped tables
@@ -303,7 +311,7 @@ ALTER TABLE `section`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `subjects`

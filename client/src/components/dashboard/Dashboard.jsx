@@ -26,6 +26,7 @@ const Dashboard = ({
 }) => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
+  const [classAdviser, SetClassAdviser] = useState([]);
 
   // get the current date
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -39,6 +40,7 @@ const Dashboard = ({
     fetchClasses();
   }, [setClasses]);
 
+  //fetch classes function
   const fetchClasses = async () => {
     const url = `${apiUrl}getClassesToday`;
     try {
@@ -54,6 +56,22 @@ const Dashboard = ({
     } catch (err) {}
   };
 
+  const getClassAdviserDetails = async () => {
+    const url = `${apiUrl}getClassAdviserDetails`;
+
+    try {
+      const response = await axios.post(url, {
+        employeeNo,
+      });
+
+      if (response.data.success) {
+        SetClassAdviser(response.data.classAdviser);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   //handle to logout
   const handleLogout = () => {
     setLoginStatus(false);
@@ -61,10 +79,12 @@ const Dashboard = ({
     navigate("/login");
   };
 
-  //check time of AM or PM 
-  const ampm = (time) => { 
+  console.log(getSubjectCode);
+
+  //check time of AM or PM
+  const ampm = (time) => {
     return time >= "12:00" ? "PM" : "AM";
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -107,13 +127,25 @@ const Dashboard = ({
               <Calendar className="h-8 w-8 text-blue-600 mr-3" />
               Today's Summary
             </h2>
-            <div className="text-sm text-slate-500">
-              {new Date().toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-slate-500 pl-5">
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+              <button
+                // onClick={() => {
+                //   navigate(`/scanner/${cls.subject_code}`);
+                //   setSubId(cls.subject_code);
+                // }}
+                className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
+              >
+                <QrCode className="h-4 w-4 mr-2" />
+                Start Scanning
+              </button>
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -318,9 +350,15 @@ const Dashboard = ({
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center text-slate-600">
                       <Calendar className="h-4 w-4 mr-3 text-blue-500" />
-                      <span className="font-medium">{
-                        cls.days + " " + cls.start_time.slice(0, -3) + " - " + cls.end_time.slice(0, -3) + " " + ampm(cls.start_time)
-                      }</span>
+                      <span className="font-medium">
+                        {cls.days +
+                          " " +
+                          cls.start_time.slice(0, -3) +
+                          " - " +
+                          cls.end_time.slice(0, -3) +
+                          " " +
+                          ampm(cls.start_time)}
+                      </span>
                     </div>
                     <div className="flex items-center text-slate-600">
                       <Users className="h-4 w-4 mr-3 text-blue-500" />
@@ -331,21 +369,11 @@ const Dashboard = ({
                     </div>
                     <div className="flex items-center text-slate-600">
                       <Clock className="h-4 w-4 mr-3 text-blue-500" />
-                      <span className="font-medium">{cls.room_name}</span> 
+                      <span className="font-medium">{cls.room_name}</span>
                     </div>
                   </div>
 
                   <div className="flex space-x-3">
-                    <button
-                      onClick={() => {
-                        navigate(`/scanner/${cls.subject_code}`);
-                        setSubId(cls.subject_code);
-                      }}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
-                    >
-                      <QrCode className="h-4 w-4 mr-2" />
-                      Start Scanning
-                    </button>
                     <button
                       onClick={() => navigate(`/attendance/${cls.id}`)}
                       className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border border-slate-200"
@@ -358,7 +386,6 @@ const Dashboard = ({
             ))}
           </div>
 
-          
           {classes.length === 0 && (
             <div className="text-center py-16">
               <Users className="h-16 w-16 text-slate-400 mx-auto mb-4" />

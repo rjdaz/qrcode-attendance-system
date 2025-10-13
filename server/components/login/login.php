@@ -32,13 +32,29 @@ function login($conn) {
         
         // verify password
         if (password_verify($password, $row['password'])) {
-            echo json_encode(['success' => true, 'message' => 'Login successful', 'name' => $row['first_name'], 'department' => $row['department_id'], 'role' => $row['organization_id'], 'employeeNo' => $row['employee_no']]);
 
-            // update the last_login time 
-            $updateStmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE username = ?");
-            $updateStmt->bind_param("s", $username);
-            $updateStmt->execute();
-            $updateStmt->close();
+            //get section id
+            $getSectionIdStmt = $conn->prepare("SELECT section_id FROM section WHERE adviser_teacher_id = ?");
+            $getSectionIdStmt->bind_param("i", $row['users_id']);
+            $getSectionIdStmt->execute();
+            $sectionResult = $getSectionIdStmt->get_result();
+
+                if ($sectionResult->num_rows > 0) {
+                    $sectionRow = $sectionResult->fetch_assoc();
+                    $sectionId = $sectionRow['section_id'];
+                } else {
+                    $sectionId = null; // No section found
+                }
+
+            echo json_encode(['success' => true, 'message' => 'Login successful', 'name' => $row['first_name'], 'department' => $row['department_id'], 'role' => $row['organization_id'], 'employeeNo' => $row['employee_no'], 'userId' => $row['users_id'], 'sectionId' => $sectionId]);
+
+                // update the last_login time 
+                $updateStmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE username = ?");
+                $updateStmt->bind_param("s", $username);
+                $updateStmt->execute();
+
+                $updateStmt->close();
+            $getSectionIdStmt->close();
         } else {
             echo json_encode(['success' => false, 'error' => 'Invalid password']);
         }

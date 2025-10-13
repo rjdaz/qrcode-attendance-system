@@ -13,10 +13,26 @@ import {
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Scanner from "./scanner"; // <-- Import your scanner logic
+import {
+  getClassAdviserDetails,
+  fetchStudentsInSection,
+} from "../../database/teachers/teacher_database";
+import { qrcodeAttendance } from "../../database/qrcode-attendace/qrcode-attendance";
 
-
-const QRScanner = ({ subId, apiUrl }) => {
+const QRScanner = ({ sectionId, apiUrl, userId }) => {
   const navigate = useNavigate();
+  const [students, setStudents] = useState([]);
+  const [classAdviser, setClassAdviser] = useState([]);
+
+  useEffect(() => {
+    fetchStudentsInSection(apiUrl, sectionId, setStudents);
+    getClassAdviserDetails(apiUrl, userId, setClassAdviser);
+  }, [sectionId]);
+
+  console.log("Section ID:", sectionId);
+  console.log("Students:", students);
+  console.log("Class Adviser:", classAdviser);
+
   // Mock class data - replace with API call
 
   // Mock students data - replace with API call
@@ -42,10 +58,12 @@ const QRScanner = ({ subId, apiUrl }) => {
                   <QrCode className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold text-slate-900">
-                  QR Scanner - Introduction to Computer Science
+                  QR Scanner - {classAdviser.section_role}
                 </h1>
               </div>
-              <p className="text-slate-600">45 students • 38 present today</p>
+              <p className="text-slate-600">
+                {students.length} students • 0 present today
+              </p>
             </div>
             <div className="flex items-center space-x-2">
               <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
@@ -79,19 +97,18 @@ const QRScanner = ({ subId, apiUrl }) => {
                 <div id="qr-reader" className="w-full min-h-[400px]"></div>
                 <div className="absolute inset-0 pointer-events-none">
                   <div className="border-4 border-blue-400 rounded-2xl m-8 animate-pulse shadow-2xl"></div>
-                  <div className="absolute top-1/2 w-full  left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    {/* <div className="w-16 h-16 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center"> */}
-                      {/* <QrCode className="h-8 w-8 text-blue-400" /> */}
-                      <Scanner
-                        onScanSuccess={(decodedText) => {
-                          // handle the scanned result here
-                          console.log("Scanned:", decodedText);
+                  <div className=" flex items-center justify-between top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-16 h-16 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center">
+                    {/* <QrCode className="h-8 w-8 text-blue-400" /> */}
+                    <Scanner
+                      onScanSuccess={(decodedText) => {
+                        // handle the scanned result here
+                        console.log("Scanned:", decodedText);
                         // You can add logic to update state, send to API, etc.
-                        
-
-                        }}
-                      />
-                    {/* </div> */}
+                        qrcodeAttendance({ decodedText, apiUrl });
+                      }}
+                    />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -230,7 +247,9 @@ const QRScanner = ({ subId, apiUrl }) => {
                   <span className="text-slate-600 font-medium">
                     Total Students:
                   </span>
-                  <span className="font-bold text-slate-900">45</span>
+                  <span className="font-bold text-slate-900">
+                    {students.length}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
                   <span className="text-slate-600 font-medium">

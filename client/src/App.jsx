@@ -11,9 +11,9 @@ import Dashboard from "./components/dashboard/Dashboard";
 import History from "./components/history/attendanceHistory";
 import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendance";
-//const Scanner = lazy(() => import("./components/scanners/qrscanners"));
 import Scanner from "./components/scanners/qrscanners";
 import AdminDashboard from "./components/AdminDashboard/AdminLayout";
+import ErrorBoundary from "./components/scanners/ErrorBoundary";
 
 //const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl =
@@ -23,18 +23,54 @@ function App() {
   const [loginStatus, setLoginStatus] = useState(() => {
     return localStorage.getItem("loginStatus") === "true";
   });
-  const [name, setName] = useState(() => localStorage.getItem("name") || "");
+
+  const [user, setUser] = useState(() => {
+    // Only load user from localStorage if logged in
+    if (localStorage.getItem("loginStatus") === "true") {
+      return (
+        JSON.parse(localStorage.getItem("user")) || {
+          name: "",
+          employeeNo: "",
+          sectionId: "",
+          userId: "",
+          department: "",
+          role: "",
+        }
+      );
+    }
+  });
+
+  //console.log(user.name);
+
+  /*const [name, setName] = useState(() => localStorage.getItem("name") || "");
   const [employeeNo, setEmployeeNo] = useState(
     () => localStorage.getItem("employeeNo") || ""
   );
-  const [subId, setSubId] = useState(() => localStorage.getItem("subId") || "");
+  const [section_id, setSectionId] = useState(() => localStorage.getItem("section_id") || "");
+  const [userId, setUserId] = useState(
+    () => localStorage.getItem("userId") || ""
+  ); */
 
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {
     localStorage.setItem("loginStatus", loginStatus);
-    localStorage.setItem("name", name);
-    localStorage.setItem("employeeNo", employeeNo);
-  }, [loginStatus, name, employeeNo]);
+    localStorage.setItem("user", JSON.stringify(user));
+  }, [loginStatus, user]);
+
+  // Reset user data when logged out
+  useEffect(() => {
+    if (!loginStatus) {
+      localStorage.removeItem("user");
+      setUser({
+        name: "",
+        employeeNo: "",
+        sectionId: "",
+        userId: "",
+        department: "",
+        role: "",
+      });
+    }
+  }, [loginStatus]);
 
   // hold routes by redirecting if not logged in
   const RequireAuth = ({ children }) => {
@@ -43,84 +79,93 @@ function App() {
 
   return (
     <Router>
-      <Suspense fallback={<div>Loading scanner...</div>}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route
-            path="/login"
-            element={
-              <Login
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
+        <Route
+          path="/login"
+          element={
+            <Login
+              apiUrl={apiUrl}
+              loginStatus={loginStatus}
+              setLoginStatus={setLoginStatus}
+              user={user}
+              setUser={setUser}
+            />
+          }
+        />
+        <Route
+          path="/adminDashboard"
+          element={
+            <RequireAuth>
+              <AdminDashboard
+                apiUrl={apiUrl}
+                setLoginStatus={setLoginStatus}
+                user={user}
+                setUser={setUser}
+              />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <RequireAuth>
+              <Dashboard
                 apiUrl={apiUrl}
                 loginStatus={loginStatus}
                 setLoginStatus={setLoginStatus}
-                name={name}
-                setName={setName}
-                setEmployeeNo={setEmployeeNo}
+                user={user}
+                setUser={setUser}
               />
-            }
-          />
-          <Route
-            path="/adminDashboard"
-            element={
-              <RequireAuth>
-                <AdminDashboard
-                  apiUrl={apiUrl}
-                  setLoginStatus={setLoginStatus}
-                  setName={setName}
-                />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <RequireAuth>
-                <Dashboard
-                  apiUrl={apiUrl}
-                  loginStatus={loginStatus}
-                  setLoginStatus={setLoginStatus}
-                  name={name}
-                  setName={setName}
-                  employeeNo={employeeNo}
-                  setSubId={setSubId}
-                />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/history"
-            element={
-              <RequireAuth>
-                <History />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/reports"
-            element={
-              <RequireAuth>
-                <Reports />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/attendance"
-            element={
-              <RequireAuth>
-                <Attendance />
-              </RequireAuth>
-            }
-          />
-          <Route
-            path="/scanner/:subId?"
-            element={
-              <RequireAuth>
-                <Scanner subId={subId} apiUrl={apiUrl} />
-              </RequireAuth>
-            }
-          />
-        </Routes>
-      </Suspense>
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <RequireAuth>
+              <History apiUrl={apiUrl} user={user} setUser={setUser} />
+            </RequireAuth>
+          }
+        />
+        <Route />
+        <Route
+          path="/history"
+          element={
+            <RequireAuth>
+              <History apiUrl={apiUrl} user={user} setUser={setUser} />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <RequireAuth>
+              <Reports />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/attendance"
+          element={
+            <RequireAuth>
+              <Attendance />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/scanner/:section_id?"
+          element={
+            <RequireAuth>
+              <Scanner
+                sectionId={user.sectionId}
+                apiUrl={apiUrl}
+                userId={user.userId}
+              />
+            </RequireAuth>
+          }
+        />
+      </Routes>
     </Router>
   );
 }

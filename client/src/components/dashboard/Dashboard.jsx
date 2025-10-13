@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -14,72 +14,50 @@ import {
   Building2,
   GraduationCap,
 } from "lucide-react";
+import {
+  fetchClasses,
+  getClassAdviserDetails,
+  fetchStudentsInSection,
+} from "../../database/teachers/teacher_database";
 
-const Dashboard = ({
-  apiUrl,
-  loginStatus,
-  setLoginStatus,
-  name,
-  setName,
-  employeeNo,
-  setSubId,
-}) => {
+const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [classAdviser, SetClassAdviser] = useState([]);
+  const [students, setStudents] = useState([]);
 
   // get the current date
   const [currentDate, setCurrentDate] = useState(new Date());
 
   console.log(currentDate);
   console.log(classes);
-  console.log(employeeNo);
+  console.log(user.name);
+  console.log(user.employeeNo);
+  console.log(user.sectionId);
+  console.log(classAdviser);
+  console.log(students);
 
   //get the todays classes
   useEffect(() => {
-    fetchClasses();
-  }, [setClasses]);
-
-  //fetch classes function
-  const fetchClasses = async () => {
-    const url = `${apiUrl}getClassesToday`;
-    try {
-      const response = await axios.post(url, {
-        employeeNo,
-      });
-
-      console.log(response.data.empNoResult);
-      if (response.data.success) {
-        setClasses(response.data.classes);
-        console.log(response.data.classes);
-      }
-    } catch (err) {}
-  };
-
-  const getClassAdviserDetails = async () => {
-    const url = `${apiUrl}getClassAdviserDetails`;
-
-    try {
-      const response = await axios.post(url, {
-        employeeNo,
-      });
-
-      if (response.data.success) {
-        SetClassAdviser(response.data.classAdviser);
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    fetchClasses(apiUrl, user.userId, setClasses);
+    getClassAdviserDetails(apiUrl, user.userId, SetClassAdviser);
+    fetchStudentsInSection(apiUrl, user.sectionId, setStudents);
+  }, [user]);
 
   //handle to logout
   const handleLogout = () => {
     setLoginStatus(false);
-    setName("");
+    setUser({
+      name: "",
+      employeeNo: "",
+      sectionId: "",
+      department: "",
+      role: "",
+      userId: "",
+    });
+    localStorage.clear();
     navigate("/login");
   };
-
-  console.log(getSubjectCode);
 
   //check time of AM or PM
   const ampm = (time) => {
@@ -102,7 +80,10 @@ const Dashboard = ({
                 </h1>
                 <p className="text-slate-600">
                   Welcome back,{" "}
-                  <span className="font-semibold text-blue-600">{name}</span>!
+                  <span className="font-semibold text-blue-600">
+                    {user.name}
+                  </span>
+                  !
                 </p>
               </div>
             </div>
@@ -137,10 +118,10 @@ const Dashboard = ({
                 })}
               </div>
               <button
-                // onClick={() => {
-                //   navigate(`/scanner/${cls.subject_code}`);
-                //   setSubId(cls.subject_code);
-                // }}
+                onClick={() => {
+                  navigate(`/scanner/${classAdviser.section_id}`);
+                  setSectionId(classAdviser.section_id);
+                }}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
               >
                 <QrCode className="h-4 w-4 mr-2" />
@@ -158,7 +139,7 @@ const Dashboard = ({
                   <p className="text-sm font-medium text-slate-600">
                     Classes Today
                   </p>
-                  <p className="text-3xl text-center font-bold text-slate-900">
+                  <p className="text-3xl font-bold text-slate-900">
                     {classes.length}
                   </p>
                 </div>
@@ -175,7 +156,7 @@ const Dashboard = ({
                     Total Students
                   </p>
                   <p className="text-3xl font-bold text-slate-900">
-                    {/* {todayStats.totalStudents} */}
+                    {students.length}
                   </p>
                 </div>
               </div>

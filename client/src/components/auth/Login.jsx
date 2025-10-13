@@ -3,22 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, Building2 } from "lucide-react";
 import axios from "axios";
 
-const Login = ({
-  apiUrl,
-  loginStatus,
-  setLoginStatus,
-  name,
-  setName,
-  setEmployeeNo,
-}) => {
+const Login = ({ apiUrl, loginStatus, setLoginStatus, user, setUser }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [remMeError, setRemMeError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [deptId, setDeptId] = useState(null);
-  const [roleId, setRoleId] = useState(null);
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({
@@ -27,9 +18,10 @@ const Login = ({
   });
 
   console.log(apiUrl);
-  console.log(name);
-  console.log(deptId);
-  console.log(roleId);
+  console.log(user?.name);
+  console.log(user?.department);
+  console.log(user?.role);
+  console.log(user?.userId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,16 +42,18 @@ const Login = ({
       const response = await axios.post(url, { username, password });
       console.log("Response data:", response.data);
 
-      
       if (response.data.success) {
         // Handle successful login
-        console.log("Login successful");
-        navigate("/dashboard");
-        setName(response.data.name);
-        setDeptId(response.data.department);
-        setRoleId(response.data.role);
-        setEmployeeNo(response.data.employeeNo);
         setLoginStatus(true);
+        setUser((prev) => ({
+          ...prev,
+          name: response.data.name,
+          employeeNo: response.data.employeeNo,
+          sectionId: response.data.sectionId,
+          userId: response.data.userId,
+          department: response.data.department,
+          role: response.data.role,
+        }));
 
         // conditional navigation based on role and department
         if (response.data.department === 1) {

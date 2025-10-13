@@ -1,25 +1,59 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 
-const QRScanner = ({ onScanSuccess }) => {
+const Scanner = ({ onScanSuccess }) => {
+  const scannerRef = useRef(null);
+  const isRunningRef = useRef(false);
+
   useEffect(() => {
-    const scanner = new Html5Qrcode("reader");
+    const containerId = "qr-reader";
 
-    const config = { fps: 10, qrbox: { width: 300, height: 300 } };
+    if (!scannerRef.current) {
+      scannerRef.current = new Html5Qrcode(containerId);
+    }
 
-    scanner
-      .start({ facingMode: "environment" }, config, (decodedText) => {
-        onScanSuccess(decodedText);
-        // scanner.stop(); // stop after scan to save memory
-      })
-      .catch((err) => console.error("Scanner failed to start", err));
+    const startScanner = async () => {
+      try {
+        if (isRunningRef.current) return; // already running
+        await scannerRef.current.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 400, height: 400 } },
+          (decodedText) => {
+            onScanSuccess(decodedText);
+          }
+        );
+        isRunningRef.current = true;
+      } catch (err) {
+        //console.error("Failed to start scanner:", err);
+      }
+    };
+
+    startScanner();
 
     return () => {
-      scanner.stop().catch(() => {});
+      const stopScanner = async () => {
+        if (scannerRef.current && isRunningRef.current) {
+          try {
+            await scannerRef.current.stop();
+            isRunningRef.current = false;
+            scannerRef.current.clear();
+          } catch (err) {
+            if (
+              !err.message.includes("not running") &&
+              !err.message.includes("under transition")
+            ) {
+              console.warn("Error stopping scanner:", err);
+            }
+          }
+        }
+      };
+      stopScanner();
     };
   }, [onScanSuccess]);
 
-  return <div id="reader" style={{ width: "400px", margin: "auto" }}></div>;
+  return (
+    <div id="qr-reader" style={{ width: "40%", height: "40%", margin: "auto" }} />
+  );
 };
 
-export default QRScanner;
+export default Scanner;

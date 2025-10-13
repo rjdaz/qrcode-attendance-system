@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 01, 2025 at 07:26 PM
+-- Generation Time: Oct 13, 2025 at 09:17 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -20,6 +20,23 @@ SET time_zone = "+00:00";
 --
 -- Database: `cabangan_hs_database`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `attendances`
+--
+
+CREATE TABLE `attendances` (
+  `attendance_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `teacher_id` int(11) NOT NULL,
+  `date` date NOT NULL DEFAULT current_timestamp(),
+  `time_in` time DEFAULT NULL,
+  `time_out` time DEFAULT NULL,
+  `status` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -119,7 +136,7 @@ CREATE TABLE `section` (
 
 INSERT INTO `section` (`section_id`, `section_role`, `section_name`, `grade_level_id`, `adviser_teacher_id`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Curie-Grade 7', 'Curie', 1, 5, 'active', '2025-09-20 00:10:42', '2025-10-02 00:30:43'),
-(2, 'Integrity-Grade 10', 'Integrity', 4, 5, 'active', '2025-09-20 00:16:59', '2025-10-02 00:30:43');
+(2, 'Integrity-Grade 10', 'Integrity', 4, 7, 'active', '2025-09-20 00:16:59', '2025-10-02 20:57:41');
 
 -- --------------------------------------------------------
 
@@ -152,7 +169,40 @@ CREATE TABLE `students` (
 --
 
 INSERT INTO `students` (`student_id`, `roll_number`, `first_name`, `last_name`, `middle_name`, `email`, `phone_number`, `date_of_birth`, `gender`, `address`, `enrollment_date`, `status`, `grade_level`, `section`, `organization_id`, `created_at`, `updated_at`) VALUES
-(1, 'S202501', 'Ryan Jake', 'Daz', 'Guiriba', 'daz@gmail.com', '09123456789', '1995-10-22', 'male', 'P1 It-ba Manito Albay', '2025-09-29', 'active', 1, 1, 1, '2025-09-29 14:13:42', '2025-09-29 14:13:42');
+(1, 'S202501', 'Ryan Jake', 'Daz', 'Guiriba', 'daz@gmail.com', '09123456789', '1995-10-22', 'male', 'P1 It-ba Manito Albay', '2025-09-29', 'active', 1, 1, 1, '2025-09-29 14:13:42', '2025-09-29 14:13:42'),
+(2, 'S250002', 'Roince', 'Jumao-as', 'R', 'roince@gmail.com', '09123456789', '2005-10-21', 'male', 'Donsol, Sorsogon City', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:15:43', '2025-10-08 17:15:43'),
+(3, 'S250003', 'Angelica', 'Reyes', 'M', 'angelica.reyes@gmail.com', '09123456780', '2006-03-15', 'female', 'Legazpi City, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(4, 'S250004', 'Mark', 'Villanueva', 'T', 'mark.villanueva@gmail.com', '09123456781', '2006-07-22', 'male', 'Daraga, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(5, 'S250005', 'Kristine', 'Gomez', 'B', 'kristine.gomez@gmail.com', '09123456782', '2005-12-10', 'female', 'Sto. Domingo, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(6, 'S250006', 'Joshua', 'Santos', 'R', 'joshua.santos@gmail.com', '09123456783', '2005-05-05', 'male', 'Camalig, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(7, 'S250007', 'Mae', 'Lopez', 'C', 'mae.lopez@gmail.com', '09123456784', '2006-09-18', 'female', 'Tabaco City, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(8, 'S250008', 'Christian', 'Garcia', 'L', 'christian.garcia@gmail.com', '09123456785', '2006-01-20', 'male', 'Polangui, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(9, 'S250009', 'Hannah', 'Cruz', 'D', 'hannah.cruz@gmail.com', '09123456786', '2005-04-14', 'female', 'Tiwi, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(10, 'S250010', 'John', 'Mendoza', 'F', 'john.mendoza@gmail.com', '09123456787', '2006-08-09', 'male', 'Guinobatan, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(11, 'S250011', 'Patricia', 'Ramos', 'E', 'patricia.ramos@gmail.com', '09123456788', '2005-10-12', 'female', 'Malinao, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
+(12, 'S250012', 'Kyle', 'Torres', 'J', 'kyle.torres@gmail.com', '09123456789', '2006-11-30', 'male', 'Ligao City, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `students_subjects`
+--
+
+CREATE TABLE `students_subjects` (
+  `student_subject_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `subject_id` int(11) NOT NULL,
+  `grade_level_id` int(11) NOT NULL,
+  `section_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `students_subjects`
+--
+
+INSERT INTO `students_subjects` (`student_subject_id`, `student_id`, `subject_id`, `grade_level_id`, `section_id`) VALUES
+(1, 1, 3, 4, 2),
+(3, 2, 3, 4, 2);
 
 -- --------------------------------------------------------
 
@@ -171,6 +221,7 @@ CREATE TABLE `subjects` (
   `room_name` varchar(255) NOT NULL,
   `teacher_id` int(11) DEFAULT NULL,
   `department_id` int(11) DEFAULT NULL,
+  `section_id` int(11) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
   `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -179,9 +230,9 @@ CREATE TABLE `subjects` (
 -- Dumping data for table `subjects`
 --
 
-INSERT INTO `subjects` (`subject_id`, `subject_code`, `subject_name`, `description`, `days`, `start_time`, `end_time`, `room_name`, `teacher_id`, `department_id`, `created_at`, `updated_at`) VALUES
-(1, 'ENG10INT', 'English', 'English', 'Wed', '07:00:00', '08:00:00', 'Integrity', 5, 3, '2025-09-21 22:51:21', '2025-10-02 01:07:19'),
-(3, 'ENG10CUR', 'English', 'English', 'Thu', '09:00:00', '10:00:00', 'Curie', 5, 3, '2025-09-23 18:58:28', '2025-10-02 01:08:15');
+INSERT INTO `subjects` (`subject_id`, `subject_code`, `subject_name`, `description`, `days`, `start_time`, `end_time`, `room_name`, `teacher_id`, `department_id`, `section_id`, `created_at`, `updated_at`) VALUES
+(1, 'ENG10INT', 'English', 'English', 'Wed', '07:00:00', '08:00:00', 'Integrity', 5, 3, 2, '2025-09-21 22:51:21', '2025-10-08 16:57:32'),
+(3, 'ENG10CUR', 'English', 'English', 'Wed', '09:00:00', '10:00:00', 'Curie', 5, 3, 1, '2025-09-23 18:58:28', '2025-10-08 19:24:05');
 
 -- --------------------------------------------------------
 
@@ -215,12 +266,19 @@ INSERT INTO `users` (`users_id`, `employee_no`, `username`, `password`, `first_n
 (1, 'S250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-23 18:14:26', '2025-09-18 22:58:56', '2025-09-23 18:14:26', 'active'),
 (2, 'S250002', 'sysAdmSupport01', '$2y$10$Rytkpm9LZAHP0iXrOu5tCeL2qRHS64UOiFAL0am0gEMoj37KIm4jm', 'Joyce Mariane', 'Dagsil', 'joycemariane@gmail.com', '09171234567', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:11:48', '2025-09-20 00:40:46', 'active'),
 (3, 'S250003', 'sysAdmSupport02', '$2y$10$UeJlioPdNMo4GdyvGsLnfuAu3PbpOzEcWGd.h5ZOjLJ/7G2pfd92i', 'Roince', 'Jumao-as', 'roince@gmail.com', '09123456789', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:16:43', '2025-09-20 00:41:02', 'active'),
-(4, 'S250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-10-02 01:15:56', '2025-09-18 23:28:16', '2025-10-02 01:15:56', 'active'),
-(5, 'S250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-10-02 01:11:39', '2025-09-18 23:40:56', '2025-10-02 01:11:39', 'active');
+(4, 'S250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-10-08 17:01:21', '2025-09-18 23:28:16', '2025-10-08 17:01:21', 'active'),
+(5, 'S250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-10-12 19:16:06', '2025-09-18 23:40:56', '2025-10-12 19:16:06', 'active'),
+(7, 'S250006', 'Teacher02', '$2y$10$/bbtkieNFlK3x9pBYbjv8eJL/FOyofhrEzSiznFEL8wSHJZNFcSKy', 'Juan', 'Dela Cruz', 'delaCruz1@gmail.com', '09171234566', 'Teacher', 3, 2, '2025-10-12 18:53:36', '2025-10-02 20:56:04', '2025-10-12 18:53:36', 'active');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `attendances`
+--
+ALTER TABLE `attendances`
+  ADD PRIMARY KEY (`attendance_id`);
 
 --
 -- Indexes for table `department`
@@ -261,13 +319,21 @@ ALTER TABLE `students`
   ADD KEY `fk_students_org` (`organization_id`);
 
 --
+-- Indexes for table `students_subjects`
+--
+ALTER TABLE `students_subjects`
+  ADD PRIMARY KEY (`student_subject_id`),
+  ADD UNIQUE KEY `student_id` (`student_id`);
+
+--
 -- Indexes for table `subjects`
 --
 ALTER TABLE `subjects`
   ADD PRIMARY KEY (`subject_id`),
   ADD UNIQUE KEY `subject_code` (`subject_code`),
   ADD KEY `fk_subjects_teacher` (`teacher_id`),
-  ADD KEY `fk_subjects_dept` (`department_id`);
+  ADD KEY `fk_subjects_dept` (`department_id`),
+  ADD KEY `fk_subjects_section` (`section_id`);
 
 --
 -- Indexes for table `users`
@@ -282,6 +348,12 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `attendances`
+--
+ALTER TABLE `attendances`
+  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `department`
@@ -311,7 +383,13 @@ ALTER TABLE `section`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `student_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `students_subjects`
+--
+ALTER TABLE `students_subjects`
+  MODIFY `student_subject_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `subjects`
@@ -323,7 +401,7 @@ ALTER TABLE `subjects`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `users_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- Constraints for dumped tables
@@ -343,10 +421,20 @@ ALTER TABLE `students`
   ADD CONSTRAINT `fk_students_org` FOREIGN KEY (`organization_id`) REFERENCES `organization` (`organization_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
+-- Constraints for table `students_subjects`
+--
+ALTER TABLE `students_subjects`
+  ADD CONSTRAINT `fk_grade_level_id` FOREIGN KEY (`grade_level_id`) REFERENCES `gradelevel` (`grade_level_id`),
+  ADD CONSTRAINT `fk_section_id` FOREIGN KEY (`section_id`) REFERENCES `section` (`section_id`),
+  ADD CONSTRAINT `fk_student_id` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`),
+  ADD CONSTRAINT `fk_subject_id` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`subject_id`);
+
+--
 -- Constraints for table `subjects`
 --
 ALTER TABLE `subjects`
   ADD CONSTRAINT `fk_subjects_dept` FOREIGN KEY (`department_id`) REFERENCES `department` (`department_id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_subjects_section` FOREIGN KEY (`section_id`) REFERENCES `section` (`section_id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_subjects_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`users_id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --

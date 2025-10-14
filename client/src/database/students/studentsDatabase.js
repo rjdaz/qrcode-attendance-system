@@ -10,7 +10,7 @@ export const fetchStudents = async (apiUrl, setStudents) => {
     if (response.data.success) {
       setStudents(response.data.studentsData);
     } else {
-
+      console.log('No fetching data!');
      }
   } catch (err) {
     console.error("Error fetching students:", err);

@@ -4,6 +4,8 @@ import { Html5Qrcode } from "html5-qrcode";
 const Scanner = ({ onScanSuccess }) => {
   const scannerRef = useRef(null);
   const isRunningRef = useRef(false);
+  const lastScanTimeRef = useRef(0); // 🕒 Tracks last scan time
+  const scanCooldown = 3000; // 3 seconds delay between scans
 
   useEffect(() => {
     const containerId = "qr-reader";
@@ -17,9 +19,15 @@ const Scanner = ({ onScanSuccess }) => {
         if (isRunningRef.current) return; // already running
         await scannerRef.current.start(
           { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 400, height: 400 } },
+          { fps: 10, qrbox: { width: 300, height: 300 } },
           (decodedText) => {
-            onScanSuccess(decodedText);
+             const now = Date.now();
+
+             // Prevent multiple scans too quickly (spam)
+             if (now - lastScanTimeRef.current < scanCooldown) return;
+
+             lastScanTimeRef.current = now;
+             onScanSuccess(decodedText);;
           }
         );
         isRunningRef.current = true;
@@ -47,12 +55,12 @@ const Scanner = ({ onScanSuccess }) => {
           }
         }
       };
-      stopScanner();
+      //stopScanner();
     };
   }, [onScanSuccess]);
 
   return (
-    <div id="qr-reader" style={{ width: "40%", height: "40%", margin: "auto" }} />
+    <div id="qr-reader" style={{ width: 300, height: 300, margin: "auto" }} />
   );
 };
 

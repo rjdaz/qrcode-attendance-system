@@ -10,32 +10,41 @@ import {
   Building2,
   QrCode,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Scanner from "./scanner"; // <-- Import your scanner logic
 import {
   getClassAdviserDetails,
   fetchStudentsInSection,
 } from "../../database/teachers/teacher_database";
-import { qrcodeAttendance } from "../../database/qrcode-attendace/qrcode-attendance";
+import { fetchStudents } from "../../database/students/studentsDatabase";
+import { getAllattendanceTable } from "../../database/attendance/attendances";
+import axios from "axios";
 
 const QRScanner = ({ sectionId, apiUrl, userId }) => {
   const navigate = useNavigate();
+
+  // ARRAYS
   const [students, setStudents] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
   const [classAdviser, setClassAdviser] = useState([]);
+  const [allAttendance, setAllAttendance] = useState([]);
+
+  const date = new Date().toISOString().split("T")[0];
+  const isProcessingRef = useRef(false);
 
   useEffect(() => {
     fetchStudentsInSection(apiUrl, sectionId, setStudents);
     getClassAdviserDetails(apiUrl, userId, setClassAdviser);
+    fetchStudents(apiUrl, setAllStudents);
+    getAllattendanceTable(apiUrl, setAllAttendance);
   }, [sectionId]);
 
   console.log("Section ID:", sectionId);
   console.log("Students:", students);
   console.log("Class Adviser:", classAdviser);
-
-  // Mock class data - replace with API call
-
-  // Mock students data - replace with API call
+  console.log("All Students:", allStudents);
+  console.log("All attendance:", allAttendance);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -99,15 +108,76 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                   <div className="border-4 border-blue-400 rounded-2xl m-8 animate-pulse shadow-2xl"></div>
                   <div className=" flex items-center justify-between top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <div className="w-16 h-16 bg-blue-500 bg-opacity-20 rounded-full flex items-center justify-center">
-                    {/* <QrCode className="h-8 w-8 text-blue-400" /> */}
-                    <Scanner
-                      onScanSuccess={(decodedText) => {
-                        // handle the scanned result here
-                        console.log("Scanned:", decodedText);
-                        // You can add logic to update state, send to API, etc.
-                        qrcodeAttendance({ decodedText, apiUrl });
-                      }}
-                    />
+                      {allStudents.length > 0 ? (
+                        <Scanner
+                          onScanSuccess={async (decodedText) => {
+                            if (isProcessingRef.current) return;
+                            isProcessingRef.current = true;
+
+                            console.log("Scanned:", decodedText);
+
+                            // GET THE STUDENT BASE ON THE rollNumber
+                            const findStudentByRollNumber = students.find(
+                              (student) => student.roll_number === decodedText
+                            );
+
+                            if (!findStudentByRollNumber) {
+                              console.log(
+                                "Invalid QR Code: Student not found."
+                              );
+                              return;
+                            }
+
+                            const findSamestudentIdAndDate = allAttendance.some(
+                              (attendance) =>
+                                attendance.date === date &&
+                                attendance.student_id ===
+                                  findStudentByRollNumber?.student_id
+                            );
+
+                            console.log(findStudentByRollNumber);
+                            console.log(findStudentByRollNumber?.student_id);
+
+                            // CHECK IF IT IS ALREADY LOG-IN
+                            if (findSamestudentIdAndDate) {
+                              console.log("Your Are Already Log In!");
+                              return;
+                            }
+
+                            const url = `${apiUrl}qrcodeAttendance`;
+
+                            try {
+                              const responce = await axios.post(url, {
+                                student_id: findStudentByRollNumber?.student_id,
+                                section_id: findStudentByRollNumber?.section,
+                                date,
+                                time_in: new Date().toLocaleTimeString(),
+                                status: "Present",
+                              });
+
+                              if (responce.data.success) {
+                                console.log(responce.data.messages);
+
+                                // REFRESH DATA
+                                await getAllattendanceTable(
+                                  apiUrl,
+                                  setAllAttendance
+                                );
+                              } else {
+                                console.log(responce.data.messages);
+                              }
+                            } catch (err) {
+                              console.log("Error", err);
+                            }
+
+                            isProcessingRef.current = false;
+                          }}
+                        />
+                      ) : (
+                        <p className="text-center text-slate-500 mt-4">
+                          Loading students... Please wait.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -138,8 +208,7 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
               </div>
             </div>
 
-            {/* Recent Scans */}
-            {false && (
+            {/* Recent Scans
               <div className="mt-8 bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
                 <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center">
                   <CheckCircle className="h-6 w-6 text-emerald-600 mr-3" />
@@ -178,8 +247,7 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
+              </div> */}
           </div>
 
           {/* Sidebar */}
@@ -255,19 +323,41 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                   <span className="text-slate-600 font-medium">
                     Present Today:
                   </span>
-                  <span className="font-bold text-emerald-600">38</span>
+                  <span className="font-bold text-emerald-600">
+                    {
+                      allAttendance.filter(
+                        (a) => a.section_id === sectionId && a.date === date
+                      ).length
+                    }
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-red-50 rounded-xl">
                   <span className="text-slate-600 font-medium">
                     Absent Today:
                   </span>
-                  <span className="font-bold text-red-600">7</span>
+                  <span className="font-bold text-red-600">
+                    {students.length -
+                      allAttendance.filter(
+                        (a) => a.section_id === sectionId && a.date === date
+                      ).length}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-blue-50 rounded-xl">
                   <span className="text-slate-600 font-medium">
                     Attendance Rate:
                   </span>
-                  <span className="font-bold text-blue-600">84%</span>
+                  <span className="font-bold text-blue-600">
+                    {students.length > 0
+                      ? (
+                          (allAttendance.filter(
+                            (a) => a.section_id === sectionId && a.date === date
+                          ).length /
+                            students.length) *
+                          100
+                        ).toFixed(2)
+                      : 0}
+                    %
+                  </span>
                 </div>
               </div>
             </div>

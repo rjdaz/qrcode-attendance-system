@@ -19,6 +19,8 @@
       include '../components/students/getAllStudentsData.php';
     // qrcode attendance
       include '../components/qrcode-attendance/qrcodeAttendance.php';
+    // attendance table
+      include '../components/attendance/getAllAttendanceTable.php';
 
   $action = isset($_GET['action']) ? $_GET['action'] : '';
 
@@ -61,6 +63,10 @@
     // qrcode attendance
     case 'qrcodeAttendance':
       qrcodeAttendance($conn);
+    break;
+    // attendance table
+    case 'getAllAttendanceTable':
+      getAllAttendanceTable($conn);
     break;
     default:
       echo "Invalid action"; 

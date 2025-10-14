@@ -120,7 +120,7 @@ const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
               <button
                 onClick={() => {
                   navigate(`/scanner/${classAdviser.section_id}`);
-                  setSectionId(classAdviser.section_id);
+                  // setSectionId(classAdviser.section_id);
                 }}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
               >

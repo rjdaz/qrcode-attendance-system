@@ -13,7 +13,7 @@ import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendance";
 import Scanner from "./components/scanners/qrscanners";
 import AdminDashboard from "./components/AdminDashboard/AdminLayout";
-import ErrorBoundary from "./components/scanners/ErrorBoundary";
+import BySectionAttendance from './components/attendance/bySectionAttendance';
 
 //const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl =
@@ -150,6 +150,14 @@ function App() {
           element={
             <RequireAuth>
               <Attendance />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/attendance/full/:section_id?"
+          element={
+            <RequireAuth>
+              <BySectionAttendance apiUrl={apiUrl} user={user} />
             </RequireAuth>
           }
         />

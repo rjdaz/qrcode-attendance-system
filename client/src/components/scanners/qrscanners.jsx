@@ -30,6 +30,10 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
   const [classAdviser, setClassAdviser] = useState([]);
   const [allAttendance, setAllAttendance] = useState([]);
 
+  // manual entry
+  const [manualEntry, setManualEntry] = useState(false);
+  const [searchManualEntry, setSearchManualEntry] = useState("");
+
   const date = new Date().toISOString().split("T")[0];
   const isProcessingRef = useRef(false);
 
@@ -40,11 +44,31 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
     getAllattendanceTable(apiUrl, setAllAttendance);
   }, [sectionId]);
 
+  // get the student present today
+  const presentToday = allAttendance.filter(
+    (a) => a.section_id === sectionId && a.date === date
+  ).length;
+
+  // get the student info (manual Entry)
+  const searchStudentID = students.filter(
+    (s) => s.roll_number === searchManualEntry
+  );
+
+  //check the student is already login or present today
+  const checkStatusOfStudent = (studentId) => {
+    return allAttendance.some((s) =>
+      s.student_id === studentId && s.date === date
+    );
+  };
+
   console.log("Section ID:", sectionId);
   console.log("Students:", students);
   console.log("Class Adviser:", classAdviser);
   console.log("All Students:", allStudents);
   console.log("All attendance:", allAttendance);
+  console.log(searchManualEntry);
+  console.log(searchStudentID);
+  console.log(checkStatusOfStudent());
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -71,11 +95,14 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                 </h1>
               </div>
               <p className="text-slate-600">
-                {students.length} students • 0 present today
+                {students.length} students • {presentToday} present today
               </p>
             </div>
             <div className="flex items-center space-x-2">
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <button
+                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                onClick={() => setManualEntry(!manualEntry)}
+              >
                 <Users className="h-4 w-4" />
                 <span>Manual Entry</span>
               </button>
@@ -207,53 +234,12 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                 </ul>
               </div>
             </div>
-
-            {/* Recent Scans
-              <div className="mt-8 bg-white rounded-2xl shadow-lg border border-slate-200 p-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-6 flex items-center">
-                  <CheckCircle className="h-6 w-6 text-emerald-600 mr-3" />
-                  Recent Scans
-                </h3>
-                <div className="space-y-4">
-                  {[
-                    {
-                      id: "2023001",
-                      name: "Juan Dela Cruz",
-                      status: "present",
-                      timeScanned: "09:15 AM",
-                    },
-                  ].map((scan, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-50 to-green-50 rounded-xl border border-emerald-200"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center">
-                          <CheckCircle className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-900">
-                            Juan Dela Cruz
-                          </p>
-                          <p className="text-sm text-slate-600">ID: 2023001</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-emerald-600">
-                          Present
-                        </p>
-                        <p className="text-xs text-slate-500">09:15 AM</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div> */}
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Manual Attendance */}
-            {false && (
+            {manualEntry && (
               <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
                 <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center">
                   <Users className="h-6 w-6 text-blue-600 mr-3" />
@@ -264,36 +250,75 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                   <input
                     type="text"
                     placeholder="Search by name or ID..."
+                    value={searchManualEntry}
+                    onChange={(e) => setSearchManualEntry(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
                   />
                 </div>
 
                 <div className="max-h-64 overflow-y-auto space-y-3">
-                  {[
-                    {
-                      id: "2023003",
-                      name: "Pedro Garcia",
-                      status: "absent",
-                    },
-                  ].map((student) => (
+                  {searchStudentID.map((student, index) => (
                     <div
-                      key={student.id}
+                      key={index}
                       className="flex items-center justify-between p-4 border-2 border-slate-200 rounded-xl hover:bg-slate-50 transition-all duration-200"
                     >
                       <div>
                         <p className="font-semibold text-slate-900">
-                          Pedro Garcia
+                          {student.last_name +
+                            ", " +
+                            student.first_name +
+                            " " +
+                            student.middle_name}
                         </p>
-                        <p className="text-sm text-slate-600">ID: 2023003</p>
+                        <p className="text-sm text-slate-600">
+                          ID: {student.roll_number}
+                        </p>
                       </div>
                       <div className="flex items-center space-x-3">
                         <span
-                          className={`px-3 py-1 text-xs font-semibold rounded-full border text-red-600 bg-red-50 border-red-200`}
+                          className={`  text-xs font-semibold rounded-full border  bg-red-50 border-red-200`}
                         >
-                          absent
+                          {checkStatusOfStudent(student?.student_id) ? (
+                            <span className="px-3 py-1 text-xs font-semibold rounded-full border text-green-600 bg-green-50 border-green-200">
+                              Present
+                            </span>
+                          ) : (
+                            <span className="px-3 py-1 text-xs font-semibold rounded-full border text-red-600 bg-red-50 border-red-200">
+                              Absent
+                            </span>
+                          )}
                         </span>
-                        {false && (
-                          <button className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-xs rounded-lg transition-all duration-200 shadow-md hover:shadow-lg">
+                        {true && (
+                          <button
+                            className="px-3 py-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-xs rounded-lg transition-all duration-200 shadow-md hover:shadow-lg"
+                            onClick={async () => {
+                              const url = `${apiUrl}qrcodeAttendance`;
+
+                              try {
+                                const responce = await axios.post(url, {
+                                  student_id: student.student_id,
+                                  section_id: student.section,
+                                  date,
+                                  time_in: new Date().toLocaleTimeString(),
+                                  status: "Present",
+                                });
+
+                                if (responce.data.success) {
+                                  console.log(responce.data.messages);
+
+                                  // REFRESH DATA
+                                  await getAllattendanceTable(
+                                    apiUrl,
+                                    setAllAttendance
+                                  );
+                                } else {
+                                  console.log(responce.data.messages);
+                                }
+                              } catch (err) {
+                                console.log("Error :", err);
+                              }
+                            }}
+                          >
                             Mark Present
                           </button>
                         )}
@@ -369,7 +394,10 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                 Quick Actions
               </h3>
               <div className="space-y-3">
-                <button className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all duration-200 border border-slate-200 font-medium">
+                <button
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all duration-200 border border-slate-200 font-medium"
+                  onClick={() => (navigate(`/attendance/full/${sectionId}`))}
+                >
                   <Users className="h-4 w-4" />
                   <span>View Full Attendance</span>
                 </button>

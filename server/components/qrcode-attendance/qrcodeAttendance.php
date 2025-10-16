@@ -14,7 +14,7 @@ function qrcodeAttendance($conn) {
     $checkResult = checkStudentAttendace($conn, $student_id, $date);
 
     if ($checkResult->num_rows > 0) {
-        echo json_encode(['success' => true, 'messages' => 'Is Already Log in']);
+        echo json_encode(['success' => true, 'messages' => 'Your are Already Log in']);
 
         return;
     }

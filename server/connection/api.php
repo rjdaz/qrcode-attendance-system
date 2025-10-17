@@ -21,6 +21,9 @@
       include '../components/qrcode-attendance/qrcodeAttendance.php';
     // attendance table
       include '../components/attendance/getAllAttendanceTable.php';
+      include '../components/attendance/getInnerJoinAttAndStdnts.php';
+    // subjects
+      include '../components/subjects/sortingSubjectsBySection.php';
 
   $action = isset($_GET['action']) ? $_GET['action'] : '';
 
@@ -67,6 +70,13 @@
     // attendance table
     case 'getAllAttendanceTable':
       getAllAttendanceTable($conn);
+    break;
+    case 'getInnerJoinAttAndStdnts':
+      getInnerJoinAttAndStdnts($conn);
+    break;
+    //subjects
+    case 'sortingSubjectsBySection':
+      sortingSubjectsBySection($conn);
     break;
     default:
       echo "Invalid action"; 

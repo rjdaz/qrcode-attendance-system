@@ -16,3 +16,31 @@ export const getAllattendanceTable = async (apiUrl, setAllAttendance) => {
     console.error("Error fetching attedances data:", err);
   }
 };
+
+// join the attendances and students datas
+export const innerJoinAttAndStdntsData = async (
+  apiUrl,
+  setAllAttendances,
+  sectionId,
+  date
+) => {
+  const url = `${apiUrl}getInnerJoinAttAndStdnts`;
+
+  try {
+    const responce = await axios.post(url, {
+      sectionId,
+      date,
+    });
+
+    console.log(responce.data)
+
+    if (responce.data.success) {
+      setAllAttendances(responce.data.currentAttendances);
+    } else {
+      console.log("No fetching Data");
+    }
+  } catch (err) {
+    console.error("Error fetching attedances data:", err);
+  }
+};
+

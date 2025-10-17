@@ -10,55 +10,152 @@ import {
   XCircle,
 } from "lucide-react";
 import { fetchStudentsInSection } from "../../database/teachers/teacher_database";
-import { innerJoinAttAndStdntsData } from "../../database/attendance/attendances";
-import { sortingSubjectsBySection } from "../../database/subjects/subjects";
 
 const FullAttendance = ({ apiUrl, user }) => {
   const navigate = useNavigate();
   const { section_id } = useParams();
   const [students, setStudents] = useState([]);
-  const [allAttendances, setAllAttendances] = useState([]);
-  const [allSubjBySect, setAllSubjBySect] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
-
-  const date = new Date().toISOString().split("T")[0];
 
   const activeSectionId = section_id || user?.sectionId;
   const numericSectionId = activeSectionId
     ? Number(activeSectionId)
     : undefined;
-
   //
   useEffect(() => {
     if (numericSectionId) {
       fetchStudentsInSection(apiUrl, numericSectionId, setStudents);
-      innerJoinAttAndStdntsData(
-        apiUrl,
-        setAllAttendances,
-        numericSectionId,
-        date
-      );
-      sortingSubjectsBySection(apiUrl, numericSectionId, setAllSubjBySect);
     }
-  }, [numericSectionId, apiUrl, date]);
+  }, [numericSectionId, apiUrl]);
 
-  const filteredStudents = allAttendances
-    .filter((student) => {
-      if (statusFilter === "all") return true;
-      if (statusFilter === "present") return student.status === "Present";
-      if (statusFilter === "late") return student.status === "Late";
-      if (statusFilter === "absent") return student.attendance_id === null;
-      return true;
-    })
-    .sort((a, b) => {
-      return a.last_name.localeCompare(b.last_name);
+  // Fallback mock students (12) if API returns none
+  const fallbackStudents = useMemo(() => {
+    const mockNames = [
+      { first_name: "Angelica", last_name: "Reyes" },
+      { first_name: "Christian", last_name: "Garcia" },
+      { first_name: "Hannah", last_name: "Cruz" },
+      { first_name: "John", last_name: "Mendoza" },
+      { first_name: "Joshua", last_name: "Santos" },
+      { first_name: "Kristine", last_name: "Gomez" },
+      { first_name: "Kyle", last_name: "Torres" },
+      { first_name: "Mae", last_name: "Lopez" },
+      { first_name: "Mark", last_name: "Villanueva" },
+      { first_name: "Patricia", last_name: "Ramos" },
+      { first_name: "Ryan Jake", last_name: "Daz" },
+      { first_name: "Roince", last_name: "Jumao-as" },
+    ];
+    return mockNames.map((n, idx) => ({
+      student_id: idx + 1,
+      roll_number: `S25${String(idx + 1).padStart(4, "0")}`,
+      first_name: n.first_name,
+      last_name: n.last_name,
+    }));
+  }, []);
+
+  // Deterministic per-student minute offset (so time stays stable)
+  const getStableMinuteOffset = (student) => {
+    const source = `${student.student_id}-${student.roll_number || ""}-${
+      student.last_name || ""
+    }`;
+    let sum = 0;
+    for (let i = 0; i < source.length; i++)
+      sum = (sum + source.charCodeAt(i)) % 60;
+    return sum % 30; // 0..29 minutes window
+  };
+
+  const formatTime12h = (hours24, minutes) => {
+    const h = hours24 % 12 === 0 ? 12 : hours24 % 12;
+    const ampm = hours24 < 12 ? "AM" : "PM";
+    const mm = String(minutes).padStart(2, "0");
+    return `${h}:${mm} ${ampm}`;
+  };
+
+  // Prepare alphabetized list with mock scan time
+  const displayedStudents = useMemo (() => {
+    const base = students.length > 0 ? students : fallbackStudents;
+    const sorted = [...base].sort((a, b) => {
+      const aLast = (a.last_name || "").toLowerCase();
+      const bLast = (b.last_name || "").toLowerCase();
+      if (aLast !== bLast) return aLast.localeCompare(bLast);
+      const aFirst = (a.first_name || "").toLowerCase();
+      const bFirst = (b.first_name || "").toLowerCase();
+      return aFirst.localeCompare(bFirst);
     });
+    return sorted.map((s) => {
+      const minuteOffset = getStableMinuteOffset(s);
+      const status =
+        minuteOffset <= 5 ? "present" : minuteOffset <= 15 ? "late" : "absent";
+      // Time In at 8:00 + minuteOffset
+      const timeInHours24 = 8 + Math.floor(minuteOffset / 60);
+      const timeInMinutes = minuteOffset % 60;
+      const mock_time_in =
+        status !== "absent"
+          ? formatTime12h(timeInHours24, timeInMinutes)
+          : null;
+      // Time Out at 17:00 + minuteOffset
+      const timeOutBaseMinutes = minuteOffset % 60;
+      const mock_time_out =
+        status !== "absent"
+          ? formatTime12h(
+              17 + Math.floor(minuteOffset / 60),
+              timeOutBaseMinutes
+            )
+          : null;
+      return { ...s, mock_time_in, mock_time_out, status };
+    });
+  }, [students, fallbackStudents]);
 
-  console.log(students);
-  console.log(user.sectionId);
-  console.log(date);
-  console.log(allAttendances);
-  console.log(allSubjBySect);
+  const filteredStudents = useMemo(() => {
+    if (statusFilter === "all") return displayedStudents;
+    return displayedStudents.filter((s) => s.status === statusFilter);
+  }, [displayedStudents, statusFilter]);
+
+  const statusCounts = useMemo(() => {
+    let present = 0;
+    let late = 0;
+    let absent = 0;
+    for (const s of displayedStudents) {
+      if (s.status === "present") present += 1;
+      else if (s.status === "late") late += 1;
+      else if (s.status === "absent") absent += 1;
+    }
+    return { present, late, absent, all: displayedStudents.length };
+  }, [displayedStudents]);
+
+  const [currentDateDisplay, setCurrentDateDisplay] = useState("");
+
+  useEffect(() => {
+    const computeDate = () =>
+      new Date().toLocaleDateString(undefined, {
+        month: "2-digit",
+        day: "2-digit",
+        year: "2-digit",
+      });
+
+    setCurrentDateDisplay(computeDate());
+
+    let timeoutId;
+    const scheduleMidnightUpdate = () => {
+      const now = new Date();
+      const next = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 1,
+        0,
+        0,
+        1,
+        0
+      );
+      const msUntilNext = next.getTime() - now.getTime();
+      timeoutId = setTimeout(() => {
+        setCurrentDateDisplay(computeDate());
+        scheduleMidnightUpdate();
+      }, msUntilNext);
+    };
+
+    scheduleMidnightUpdate();
+    return () => clearTimeout(timeoutId);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -83,7 +180,9 @@ const FullAttendance = ({ apiUrl, user }) => {
                   Full Attendance
                 </h1>
               </div>
-              <p className="text-slate-600">{allAttendances.length} students</p>
+              <p className="text-slate-600">
+                {displayedStudents.length} students
+              </p>
             </div>
             <div className="w-24" />
           </div>
@@ -115,7 +214,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.all} */}
+                      {statusCounts.all}
                     </span>
                   </button>
                   <button
@@ -135,7 +234,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.present} */}
+                      {statusCounts.present}
                     </span>
                   </button>
                   <button
@@ -155,7 +254,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.late} */}
+                      {statusCounts.late}
                     </span>
                   </button>
                   <button
@@ -175,7 +274,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.absent} */}
+                      {statusCounts.absent}
                     </span>
                   </button>
                 </div>
@@ -188,7 +287,7 @@ const FullAttendance = ({ apiUrl, user }) => {
               </div>
               <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-slate-50 text-slate-700 text-sm font-medium border border-slate-200">
                 <Calendar className="h-4 w-4 mr-2 text-slate-500" />
-                {date}
+                {currentDateDisplay}
               </span>
             </div>
           </div>
@@ -196,7 +295,7 @@ const FullAttendance = ({ apiUrl, user }) => {
             {/* Header row */}
             <div className="hidden md:flex text-xs uppercase tracking-wide text-slate-500 pb-2">
               <div className="w-1/3">Name</div>
-              <div className="w-1/6">Roll Number</div>
+              <div className="w-1/6">ID / Roll</div>
               <div className="w-1/6">Time In</div>
               <div className="w-1/6">Time Out</div>
               <div className="w-1/6">Status</div>
@@ -208,34 +307,35 @@ const FullAttendance = ({ apiUrl, user }) => {
               >
                 <div className="w-1/3">
                   <p className="font-semibold text-slate-900">
-                    {`${student.last_name}, ${student.first_name} ${student.middle_name}`}
+                    {student.fullname ||
+                      `${student.first_name} ${student.last_name}`}
                   </p>
                 </div>
                 <div className="w-1/6">
                   <p className="text-sm text-slate-600">
-                    {student.roll_number}
+                    {student.student_id} / {student.roll_number}
                   </p>
                 </div>
                 <div className="w-1/6">
-                  {student.time_in ? (
+                  {student.mock_time_in ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-100">
-                      {student.time_in}
+                      {student.mock_time_in}
                     </span>
                   ) : (
                     <span className="text-sm text-slate-400">-</span>
                   )}
                 </div>
                 <div className="w-1/6">
-                  {student.time_out ? (
+                  {student.mock_time_out ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-sm font-medium border border-indigo-100">
-                      {student.time_out}
+                      {student.mock_time_out}
                     </span>
                   ) : (
                     <span className="text-sm text-slate-400">-</span>
                   )}
                 </div>
                 <div className="w-1/6">
-                  {student.status === "Present" && (
+                  {student.status === "present" && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-green-50 text-green-700 text-sm font-medium border border-green-100">
                       Present
                     </span>
@@ -245,7 +345,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                       Late
                     </span>
                   )}
-                  {student.status === null && (
+                  {student.status === "absent" && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 text-sm font-medium border border-rose-100">
                       Absent
                     </span>

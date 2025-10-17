@@ -13,7 +13,7 @@ import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendance";
 import Scanner from "./components/scanners/qrscanners";
 import AdminDashboard from "./components/AdminDashboard/AdminLayout";
-import BySectionAttendance from './components/attendance/bySectionAttendance';
+import BySectionAttendance from "./components/attendance/bySectionAttendance";
 
 //const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl =
@@ -39,17 +39,6 @@ function App() {
       );
     }
   });
-
-  //console.log(user.name);
-
-  /*const [name, setName] = useState(() => localStorage.getItem("name") || "");
-  const [employeeNo, setEmployeeNo] = useState(
-    () => localStorage.getItem("employeeNo") || ""
-  );
-  const [section_id, setSectionId] = useState(() => localStorage.getItem("section_id") || "");
-  const [userId, setUserId] = useState(
-    () => localStorage.getItem("userId") || ""
-  ); */
 
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {

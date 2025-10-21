@@ -10,7 +10,7 @@ import Login from "./components/auth/Login";
 import Dashboard from "./components/dashboard/Dashboard";
 import History from "./components/history/attendanceHistory";
 import Reports from "./components/reports/reports";
-import Attendance from "./components/attendance/attendance";
+import Attendance from "./components/attendance/attendancePerSubjects";
 import Scanner from "./components/scanners/qrscanners";
 import AdminDashboard from "./components/AdminDashboard/AdminLayout";
 import BySectionAttendance from "./components/attendance/bySectionAttendance";
@@ -40,11 +40,16 @@ function App() {
     }
   });
 
+  const [getSubjectId, setGetSubjectId] = useState(() => {
+    return localStorage.getItem("getSubjectId") || "";
+  });
+
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {
     localStorage.setItem("loginStatus", loginStatus);
     localStorage.setItem("user", JSON.stringify(user));
-  }, [loginStatus, user]);
+    localStorage.setItem("getSubjectId", getSubjectId);
+  }, [loginStatus, user, getSubjectId]);
 
   // Reset user data when logged out
   useEffect(() => {
@@ -105,6 +110,9 @@ function App() {
                 setLoginStatus={setLoginStatus}
                 user={user}
                 setUser={setUser}
+                getSubjectId={getSubjectId}
+                sectionId={user?.sectionId}
+                setGetSubjectId={setGetSubjectId}
               />
             </RequireAuth>
           }
@@ -119,14 +127,6 @@ function App() {
         />
         <Route />
         <Route
-          path="/history"
-          element={
-            <RequireAuth>
-              <History apiUrl={apiUrl} user={user} setUser={setUser} />
-            </RequireAuth>
-          }
-        />
-        <Route
           path="/reports"
           element={
             <RequireAuth>
@@ -135,10 +135,14 @@ function App() {
           }
         />
         <Route
-          path="/attendance"
+          path="/attendance/:getSubjectId?"
           element={
             <RequireAuth>
-              <Attendance />
+              <Attendance
+                apiUrl={apiUrl}
+                getSubjectId={getSubjectId}
+                setGetSubjectId={setGetSubjectId}
+              />
             </RequireAuth>
           }
         />
@@ -155,9 +159,9 @@ function App() {
           element={
             <RequireAuth>
               <Scanner
-                sectionId={user.sectionId}
+                sectionId={user?.sectionId}
                 apiUrl={apiUrl}
-                userId={user.userId}
+                userId={user?.userId}
               />
             </RequireAuth>
           }

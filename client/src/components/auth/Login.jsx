@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff, User, Lock, Building2 } from "lucide-react";
 import axios from "axios";
+import { getUserData } from "../../database/user/user_database";
 
 const Login = ({ apiUrl, loginStatus, setLoginStatus, user, setUser }) => {
   const [username, setUsername] = useState("");
@@ -12,30 +13,37 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, user, setUser }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
+  const [usersData, setUsersData] = useState([]);
+
   const [errors, setErrors] = useState({
     username: "",
     password: "",
   });
+
+  useEffect(() => {
+    getUserData(apiUrl, setUsersData);
+  },[])
 
   console.log(apiUrl);
   console.log(user?.name);
   console.log(user?.department);
   console.log(user?.role);
   console.log(user?.userId);
+  console.log(usersData);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!rememberMe) {
-      setRemMeError(true);
+    // if (!rememberMe) {
+    //   setRemMeError(true);
 
-      setTimeout(() => {
-        setRemMeError(false);
-        setIsSubmitting(false);
-      }, 2000);
-      return;
-    }
+    //   setTimeout(() => {
+    //     setRemMeError(false);
+    //     setIsSubmitting(false);
+    //   }, 2000);
+    //   return;
+    // }
 
     try {
       const url = `${apiUrl}login`;

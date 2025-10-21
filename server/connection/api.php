@@ -24,10 +24,17 @@
       include '../components/attendance/getInnerJoinAttAndStdnts.php';
     // subjects
       include '../components/subjects/sortingSubjectsBySection.php';
+      include '../components/subjects/getAllSubjectsData.php';
+      include '../components/subjects/getAllStudentsBySubjects.php';
+    // users
+      include '../components/users_data/getUserData.php';
 
   $action = isset($_GET['action']) ? $_GET['action'] : '';
 
   switch ($action) {
+    case 'getUserData':
+      getUserData($conn);
+    break;
     case 'login': // log in
       login($conn);
     break;
@@ -77,6 +84,12 @@
     //subjects
     case 'sortingSubjectsBySection':
       sortingSubjectsBySection($conn);
+    break;
+    case 'getAllSubjectData':
+      getAllSubjectsData($conn);
+    break;
+    case 'getAllStudentsBySubjects':
+      getAllStudentsBySubjects($conn);
     break;
     default:
       echo "Invalid action"; 

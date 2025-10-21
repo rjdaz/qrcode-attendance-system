@@ -19,6 +19,7 @@ import {
 } from "../../database/teachers/teacher_database";
 import { fetchStudents } from "../../database/students/studentsDatabase";
 import { getAllattendanceTable } from "../../database/attendance/attendances";
+import { sortingSubjectsBySection } from "../../database/subjects/subjects";
 import axios from "axios";
 
 const QRScanner = ({ sectionId, apiUrl, userId }) => {
@@ -29,12 +30,15 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
   const [allStudents, setAllStudents] = useState([]);
   const [classAdviser, setClassAdviser] = useState([]);
   const [allAttendance, setAllAttendance] = useState([]);
+  const [allSubjBySect, setAllSubjBySect] = useState([]);
 
   // manual entry
   const [manualEntry, setManualEntry] = useState(false);
   const [searchManualEntry, setSearchManualEntry] = useState("");
 
-  const date = new Date().toISOString().split("T")[0];
+  const date = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Manila",
+  });
   const isProcessingRef = useRef(false);
 
   useEffect(() => {
@@ -42,6 +46,7 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
     getClassAdviserDetails(apiUrl, userId, setClassAdviser);
     fetchStudents(apiUrl, setAllStudents);
     getAllattendanceTable(apiUrl, setAllAttendance);
+    sortingSubjectsBySection(apiUrl, sectionId, setAllSubjBySect);
   }, [sectionId]);
 
   // get the student present today
@@ -56,11 +61,24 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
 
   //check the student is already login or present today
   const checkStatusOfStudent = (studentId) => {
-    return allAttendance.some((s) =>
-      s.student_id === studentId && s.date === date
+    return allAttendance.some(
+      (s) => s.student_id === studentId && s.date === date
     );
   };
 
+  // sort by start time
+  const sortingByStartTime = allSubjBySect.sort((a, b) =>
+    a.start_time.localeCompare(b.start_time)
+  );
+
+  // add 15 mins in the first subject time
+  const startTime = sortingByStartTime?.[0]?.start_time || "";
+  const time = new Date(`1970-01-01T${startTime}`);
+  time.setMinutes(time.getMinutes() + 15);
+  const newTime = time.toTimeString().split(" ")[0];
+
+  console.log(newTime);
+  console.log(sortingByStartTime);
   console.log("Section ID:", sectionId);
   console.log("Students:", students);
   console.log("Class Adviser:", classAdviser);
@@ -69,6 +87,7 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
   console.log(searchManualEntry);
   console.log(searchStudentID);
   console.log(checkStatusOfStudent());
+  console.log(sortingByStartTime?.[0]?.start_time || "");
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -172,14 +191,29 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                             }
 
                             const url = `${apiUrl}qrcodeAttendance`;
+                            const currentTime = new Date().toLocaleTimeString(
+                              "en-GB",
+                              {
+                                hour12: false,
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                              }
+                            );
+
+                            const statusData =
+                              currentTime > newTime ? "Late" : "Present";
+
+                            console.log(statusData);
+                            console.log(currentTime);
 
                             try {
                               const responce = await axios.post(url, {
                                 student_id: findStudentByRollNumber?.student_id,
                                 section_id: findStudentByRollNumber?.section,
                                 date,
-                                time_in: new Date().toLocaleTimeString(),
-                                status: "Present",
+                                time_in: currentTime,
+                                status: statusData,
                               });
 
                               if (responce.data.success) {
@@ -249,7 +283,7 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <input
                     type="text"
-                    placeholder="Search by name or ID..."
+                    placeholder="Search by ID...  ex.S250001"
                     value={searchManualEntry}
                     onChange={(e) => setSearchManualEntry(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
@@ -396,7 +430,7 @@ const QRScanner = ({ sectionId, apiUrl, userId }) => {
               <div className="space-y-3">
                 <button
                   className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all duration-200 border border-slate-200 font-medium"
-                  onClick={() => (navigate(`/attendance/full/${sectionId}`))}
+                  onClick={() => navigate(`/attendance/full/${sectionId}`)}
                 >
                   <Users className="h-4 w-4" />
                   <span>View Full Attendance</span>

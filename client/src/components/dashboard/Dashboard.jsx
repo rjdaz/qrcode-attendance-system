@@ -19,29 +19,54 @@ import {
   getClassAdviserDetails,
   fetchStudentsInSection,
 } from "../../database/teachers/teacher_database";
+import { fetchStudents } from "../../database/students/studentsDatabase";
+import { getAllSubjectData } from "../../database/subjects/subjects";
+import { getAllattendanceTable } from "../../database/attendance/attendances";
 
-const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
+const Dashboard = ({
+  apiUrl,
+  setLoginStatus,
+  user,
+  setUser,
+  setSectionId,
+  getSubjectId,
+  sectionId,
+  setGetSubjectId,
+}) => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
   const [classAdviser, SetClassAdviser] = useState([]);
   const [students, setStudents] = useState([]);
+  const [allStudents, setAllStudents] = useState([]);
+  const [allSubjectData, setAllSubjectData] = useState([]);
+  const [allAttendance, setAllAttendance] = useState([]);
 
   // get the current date
   const [currentDate, setCurrentDate] = useState(new Date());
+  const date = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Manila",
+  });
 
   console.log(currentDate);
-  console.log(classes);
+  console.log("Classes: ",classes);
   console.log(user.name);
   console.log(user.employeeNo);
   console.log(user.sectionId);
   console.log(classAdviser);
-  console.log(students);
+  console.log("Students: ", students);
+  console.log(getSubjectId);
+  console.log(allSubjectData);
+  console.log("All Student: ", allStudents);
+  console.log("All Attendance: ", allAttendance);
 
   //get the todays classes
   useEffect(() => {
     fetchClasses(apiUrl, user.userId, setClasses);
     getClassAdviserDetails(apiUrl, user.userId, SetClassAdviser);
     fetchStudentsInSection(apiUrl, user.sectionId, setStudents);
+    getAllSubjectData(apiUrl, setAllSubjectData);
+    fetchStudents(apiUrl, setAllStudents);
+    getAllattendanceTable(apiUrl, setAllAttendance);
   }, [user]);
 
   //handle to logout
@@ -172,7 +197,11 @@ const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
                     Present Today
                   </p>
                   <p className="text-3xl font-bold text-emerald-600">
-                    {/* {todayStats.totalPresent} */}
+                    {
+                      allAttendance.filter(
+                        (a) => a.section_id === sectionId && a.date === date
+                      ).length
+                    }
                   </p>
                 </div>
               </div>
@@ -188,7 +217,10 @@ const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
                     Absent Today
                   </p>
                   <p className="text-3xl font-bold text-red-600">
-                    {/* {todayStats.totalAbsent} */}
+                    {students.length -
+                      allAttendance.filter(
+                        (a) => a.section_id === sectionId && a.date === date
+                      ).length}
                   </p>
                 </div>
               </div>
@@ -204,7 +236,16 @@ const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
                     Avg. Attendance
                   </p>
                   <p className="text-3xl font-bold text-indigo-600">
-                    {/* {todayStats.averageAttendance}% */}
+                    {students.length > 0
+                      ? (
+                          (allAttendance.filter(
+                            (a) => a.section_id === sectionId && a.date === date
+                          ).length /
+                            students.length) *
+                          100
+                        ).toFixed(2)
+                      : 0}
+                    %
                   </p>
                 </div>
               </div>
@@ -320,11 +361,16 @@ const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
                     </div>
                     <span
                       className={`px-3 py-1 text-sm font-semibold rounded-full border `}
-                      // ${getAttendanceColor(
-                      //   cls.attendancePercentage
-                      // )}
                     >
-                      {cls.attendancePercentage}%
+                      {
+                        ((allAttendance.filter((a) => {
+                          return (
+                            a.section_id === cls.section_id && a.date === date
+                          );
+                        }).length / allStudents.filter((s) => {
+                            return s.section === cls.section_id;
+                          }).length) * 100).toFixed(2)}
+                      %
                     </span>
                   </div>
 
@@ -344,7 +390,19 @@ const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
                     <div className="flex items-center text-slate-600">
                       <Users className="h-4 w-4 mr-3 text-blue-500" />
                       <span className="font-medium">
-                        {cls.totalStudents} students • {cls.presentToday}{" "}
+                        {
+                          allStudents.filter((s) => {
+                            return s.section === cls.section_id;
+                          }).length
+                        }{" "}
+                        students •{" "}
+                        {
+                          allAttendance.filter((a) => {
+                            return (
+                              a.section_id === cls.section_id && a.date === date
+                            );
+                          }).length
+                        }{" "}
                         present today
                       </span>
                     </div>
@@ -356,7 +414,10 @@ const Dashboard = ({ apiUrl, setLoginStatus, user, setUser, setSectionId }) => {
 
                   <div className="flex space-x-3">
                     <button
-                      onClick={() => navigate(`/attendance/${cls.id}`)}
+                      onClick={() => {
+                        navigate(`/attendance/${cls.subject_id}`);
+                        setGetSubjectId(cls.subject_id);
+                      }}
                       className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border border-slate-200"
                     >
                       View Attendance

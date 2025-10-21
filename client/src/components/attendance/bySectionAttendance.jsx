@@ -21,7 +21,9 @@ const FullAttendance = ({ apiUrl, user }) => {
   const [allSubjBySect, setAllSubjBySect] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const date = new Date().toISOString().split("T")[0];
+  const date = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Manila",
+  });
 
   const activeSectionId = section_id || user?.sectionId;
   const numericSectionId = activeSectionId
@@ -45,12 +47,16 @@ const FullAttendance = ({ apiUrl, user }) => {
   const filteredStudents = allAttendances
     .filter((student) => {
       if (statusFilter === "all") return true;
-      if (statusFilter === "present") return student.status === "Present";
+      if (statusFilter === "present")
+        return student.status === "Present" || student.status === "Late";
       if (statusFilter === "late") return student.status === "Late";
       if (statusFilter === "absent") return student.attendance_id === null;
       return true;
     })
     .sort((a, b) => {
+      const genderCompare = b.gender.localeCompare(a.gender);
+      if (genderCompare !== 0) return genderCompare;
+
       return a.last_name.localeCompare(b.last_name);
     });
 
@@ -240,7 +246,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                       Present
                     </span>
                   )}
-                  {student.status === "late" && (
+                  {student.status === "Late" && (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-sm font-medium border border-amber-100">
                       Late
                     </span>

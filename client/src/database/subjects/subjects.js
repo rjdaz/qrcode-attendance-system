@@ -41,12 +41,18 @@ export const getAllSubjectData = async (apiUrl, setAllSubjectData) => {
 };
 
 // get all students by subjects
-export const getAllStudentsBySubjects = async () => {
+export const getAllStudentsBySubjects = async (apiUrl, setAllStudentsBySubjects) => {
   const url = `${apiUrl}getAllStudentsBySubjects`;
 
   try {
-    
-  } catch (err) {
+    const response = await axios.get(url);
 
+      if (response.data.success) {
+        setAllStudentsBySubjects(reponse.data.studentsSubjectsData);
+      } else {
+        console.log(reponse.data.message);
+      }
+  } catch (err) {
+    console.log("Error: ", err);
   }
 }

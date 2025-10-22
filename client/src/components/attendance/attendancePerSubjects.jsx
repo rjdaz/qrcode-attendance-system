@@ -1,3 +1,4 @@
+import {useState, useEffect} from 'react';
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -12,27 +13,17 @@ import {
   ChevronRight,
   MoreHorizontal,
 } from "lucide-react";
-
+import {getAllStudentsBySubjects} from '../../database/subjects/subjects';
 
 const AttendanceTable = ({ apiUrl, getSubjectId, setGetSubjectId }) => {
   const navigate = useNavigate();
+  const [allStudentsBySubjects, setAllStudentsBySubjects] = useState([]);
 
-  // Mock class data - replace with API call
 
-  // Mock students data - replace with API call
 
-  // Filter and sort students
-  const filteredStudents = [];
-
-  // Pagination
-  const totalPages = 1;
-  const startIndex = 0;
-  const endIndex = 0;
-  const currentStudents = [];
-
-  const exportToCSV = () => {
-    // Placeholder for export logic
-  };
+  useEffect(() => {
+    getAllStudentsBySubjects(apiUrl, getSubjectId, setAllStudentsBySubjects);
+  }, [apiUrl])
 
   console.log("SectionId: ", getSubjectId);
 

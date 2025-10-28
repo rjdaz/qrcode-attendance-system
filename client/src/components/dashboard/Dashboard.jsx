@@ -32,6 +32,9 @@ const Dashboard = ({
   getSubjectId,
   sectionId,
   setGetSubjectId,
+  fixDate,
+  fixTime,
+  fixDay,
 }) => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);
@@ -42,13 +45,11 @@ const Dashboard = ({
   const [allAttendance, setAllAttendance] = useState([]);
 
   // get the current date
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const date = new Date().toLocaleDateString("en-CA", {
-    timeZone: "Asia/Manila",
-  });
+  const date = fixDate;
+  const time = fixTime;
+  const day = fixDay;
 
-  console.log(currentDate);
-  console.log("Classes: ",classes);
+  console.log("Classes: ", classes);
   console.log(user.name);
   console.log(user.employeeNo);
   console.log(user.sectionId);
@@ -58,6 +59,7 @@ const Dashboard = ({
   console.log(allSubjectData);
   console.log("All Student: ", allStudents);
   console.log("All Attendance: ", allAttendance);
+  console.log(date);
 
   //get the todays classes
   useEffect(() => {
@@ -362,14 +364,17 @@ const Dashboard = ({
                     <span
                       className={`px-3 py-1 text-sm font-semibold rounded-full border `}
                     >
-                      {
-                        ((allAttendance.filter((a) => {
+                      {(
+                        (allAttendance.filter((a) => {
                           return (
                             a.section_id === cls.section_id && a.date === date
                           );
-                        }).length / allStudents.filter((s) => {
+                        }).length /
+                          allStudents.filter((s) => {
                             return s.section === cls.section_id;
-                          }).length) * 100).toFixed(2)}
+                          }).length) *
+                        100
+                      ).toFixed(2)}
                       %
                     </span>
                   </div>

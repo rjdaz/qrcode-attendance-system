@@ -8,7 +8,7 @@ export const getAllattendanceTable = async (apiUrl, setAllAttendance) => {
     const responce = await axios.get(url);
 
     if (responce.data.success) {
-      setAllAttendance(responce.data.attendancesData);
+      setAllAttendance(responce.data.attendancesData);  
     } else {
       console.log("No fetching Data");
     }

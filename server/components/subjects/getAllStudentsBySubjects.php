@@ -1,7 +1,7 @@
 <?php
 
   function getAllStudentsBySubjects($conn) {
-    
+        
     $data = json_decode(file_get_contents("php://input"), true);
 
     $section_id = $data['subject_id'];

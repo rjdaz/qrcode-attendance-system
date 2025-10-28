@@ -7,7 +7,7 @@ export const sortingSubjectsBySection = async (
   setAllSubjBySect
 ) => {
   const url = `${apiUrl}sortingSubjectsBySection`;
-
+  console.log(sectionId)
   try {
     const response = await axios.post(url, {
       sectionId,

@@ -70,6 +70,8 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, user, setUser }) => {
         } else if (response.data.department === 2) {
           // Admin
           navigate("/adminDashboard"); // temporary redirect to admin dashboard
+        } else if (response.data.department === 5) {
+          navigate("/guard-scanner"); // redirect to guard qrcode
         } else {
           // Teacher
           navigate("/dashboard"); // temporary redirect to dashboard

@@ -3,6 +3,8 @@
   include 'header.php';
 
   // files
+    // get fix date and time
+      include '../components/fix_date_and_time/getFixDateAndTime.php';
     // log in
       include '../components/login/login.php';
     // teacher info
@@ -19,6 +21,7 @@
       include '../components/students/getAllStudentsData.php';
     // qrcode attendance
       include '../components/qrcode-attendance/qrcodeAttendance.php';
+      include '../components/qrcode-attendance/qrcodeAttendanceLogout.php';
     // attendance table
       include '../components/attendance/getAllAttendanceTable.php';
       include '../components/attendance/getInnerJoinAttAndStdnts.php';
@@ -32,6 +35,9 @@
   $action = isset($_GET['action']) ? $_GET['action'] : '';
 
   switch ($action) {
+    case 'getFixDateAndTime' :
+      getFixDateAndTime($conn);
+    break;
     case 'getUserData':
       getUserData($conn);
     break;
@@ -73,6 +79,9 @@
     // qrcode attendance
     case 'qrcodeAttendance':
       qrcodeAttendance($conn);
+    break;
+    case 'qrcodeAttendanceLogout':
+      qrcodeAttendanceLogout($conn);
     break;
     // attendance table
     case 'getAllAttendanceTable':

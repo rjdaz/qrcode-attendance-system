@@ -6,6 +6,12 @@ const Scanner = ({ onScanSuccess }) => {
   const isRunningRef = useRef(false);
   const lastScanTimeRef = useRef(0); // 🕒 Tracks last scan time
   const scanCooldown = 3000; // 3 seconds delay between scans
+  const callbackRef = useRef(onScanSuccess);
+
+  // Keep latest callback without restarting the scanner
+  useEffect(() => { 
+    callbackRef.current = onScanSuccess;
+  }, [onScanSuccess]);
 
   useEffect(() => {
     const containerId = "qr-reader";
@@ -27,7 +33,8 @@ const Scanner = ({ onScanSuccess }) => {
              if (now - lastScanTimeRef.current < scanCooldown) return;
 
              lastScanTimeRef.current = now;
-             onScanSuccess(decodedText);;
+             // Use latest handler
+             callbackRef.current?.(decodedText);
           }
         );
         isRunningRef.current = true;
@@ -57,10 +64,12 @@ const Scanner = ({ onScanSuccess }) => {
       };
       //stopScanner();
     };
-  }, [onScanSuccess]);
+  }, []);
 
   return (
-    <div id="qr-reader" style={{ width: 300, height: 300, margin: "auto" }} />
+    <div id="qr-reader" style={{
+      width: 300, height: 300, margin: "auto", display: "flex"
+     }} />
   );
 };
 

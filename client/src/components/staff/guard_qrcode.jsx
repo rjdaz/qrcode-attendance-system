@@ -22,7 +22,7 @@ import { getAllattendanceTable } from "../../database/attendance/attendances";
 import { sortingSubjectsBySection } from "../../database/subjects/subjects";
 import axios from "axios";
 
-const QRScanner = ({ sectionId, apiUrl, userId, fixDate, fixTime, fixDay }) => {
+const GuardScanner = ({ sectionId, apiUrl, userId, fixDate, fixTime, fixDay }) => {
   const navigate = useNavigate();
 
   // ARRAYS
@@ -162,10 +162,18 @@ const QRScanner = ({ sectionId, apiUrl, userId, fixDate, fixTime, fixDay }) => {
                             isProcessingRef.current = true;
 
                             console.log("Scanned:", decodedText);
+                            setGetDecodeText(decodedText);
 
                             // GET THE STUDENT BASE ON THE rollNumber
-                            const findStudentByRollNumber = students.find(
+                            const findStudentByRollNumber = allStudents.find(
                               (student) => student.roll_number === decodedText
+                            );
+
+                            const findSamestudentIdAndDate = allAttendance.some(
+                              (attendance) =>
+                                attendance.date === date &&
+                                attendance.student_id ===
+                                  findStudentByRollNumber?.student_id
                             );
 
                             if (!findStudentByRollNumber) {
@@ -175,52 +183,74 @@ const QRScanner = ({ sectionId, apiUrl, userId, fixDate, fixTime, fixDay }) => {
                               return;
                             }
 
-                            const findSamestudentIdAndDate = allAttendance.some(
-                              (attendance) =>
-                                attendance.date === date &&
-                                attendance.student_id ===
-                                  findStudentByRollNumber?.student_id
-                            );
-
-                            console.log(findStudentByRollNumber);
+                            console.log("student:", findStudentByRollNumber);
                             console.log(findStudentByRollNumber?.student_id);
 
-                            // CHECK IF IT IS ALREADY LOG-IN
-                            if (findSamestudentIdAndDate) {
-                              console.log("Your Are Already Log In!");
-                              return;
-                            }
+                            // if the student is going to time in
+                            if (attendanceType === "timein") {
+                              console.log("timein");
 
-                            const url = `${apiUrl}qrcodeAttendance`;
-
-                            const statusData =
-                              fixTime <= newTime ? "Present" : "Late";
-
-                            console.log(statusData);
-
-                            try {
-                              const responce = await axios.post(url, {
-                                student_id: findStudentByRollNumber?.student_id,
-                                section_id: findStudentByRollNumber?.section,
-                                status: statusData,
-                              });
-
-                              if (responce.data.success) {
-                                console.log(responce.data.messages);
-
-                                // REFRESH DATA
-                                await getAllattendanceTable(
-                                  apiUrl,
-                                  setAllAttendance
-                                );
-                              } else {
-                                console.log(responce.data.messages);
+                              // CHECK IF IT IS ALREADY LOG-IN
+                              if (findSamestudentIdAndDate) {
+                                console.log("Your Are Already Log In!");
+                                isProcessingRef.current = false;
+                                return;
                               }
-                            } catch (err) {
-                              console.log("Error", err);
-                            }
 
-                            isProcessingRef.current = false;
+                              const url = `${apiUrl}qrcodeAttendance`;
+
+                              const statusData =
+                                fixTime <= newTime ? "Present" : "Late";
+
+                              console.log(statusData);
+
+                              try {
+                                const responce = await axios.post(url, {
+                                  student_id:
+                                    findStudentByRollNumber?.student_id,
+                                  section_id: findStudentByRollNumber?.section,
+                                  status: statusData,
+                                });
+
+                                if (responce.data.success) {
+                                  console.log(responce.data.messages);
+
+                                  // REFRESH DATA
+                                  await getAllattendanceTable(
+                                    apiUrl,
+                                    setAllAttendance
+                                  );
+                                } else {
+                                  console.log(responce.data.messages);
+                                }
+                              } catch (err) {
+                                console.log("Error", err);
+                              } finally {
+                                isProcessingRef.current = false;
+                              } // if the student is going to log out
+                            } else if (attendanceType === "timeout") {
+                              // update and add for log out time
+                              console.log("timeout");
+                              const url = `${apiUrl}qrcodeAttendanceLogout`;
+
+                              try {
+                                const response = await axios.post(url, {
+                                  student_id:
+                                    findStudentByRollNumber?.student_id,
+                                });
+
+                                if (response.data.success) {
+                                  console.log("Students Already Log Out");
+                                  console.log(response.data.messages);
+                                } else {
+                                  console.log(response.data.messages);
+                                }
+                              } catch (err) {
+                                console.log(err);
+                              } finally {
+                                isProcessingRef.current = false;
+                              }
+                            }
                           }}
                         />
                       ) : (

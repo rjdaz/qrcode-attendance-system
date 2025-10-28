@@ -3,12 +3,14 @@
 // INSERT DATA
 function qrcodeAttendance($conn) {
 
+    date_default_timezone_set("Asia/Manila");
+
     $data = json_decode(file_get_contents("php://input"), true);
 
     $student_id = $data['student_id'];
     $section_id = $data['section_id'];
-    $date = $data['date'];
-    $time_in = $data['time_in'];
+    $date = date("Y-m-d");
+    $time_in = date("H:i:s");
     $status = $data['status'];
     
     $checkResult = checkStudentAttendace($conn, $student_id, $date);

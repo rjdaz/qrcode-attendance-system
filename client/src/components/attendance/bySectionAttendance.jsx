@@ -13,7 +13,7 @@ import { fetchStudentsInSection } from "../../database/teachers/teacher_database
 import { innerJoinAttAndStdntsData } from "../../database/attendance/attendances";
 import { sortingSubjectsBySection } from "../../database/subjects/subjects";
 
-const FullAttendance = ({ apiUrl, user }) => {
+const FullAttendance = ({ apiUrl, user, fixDate}) => {
   const navigate = useNavigate();
   const { section_id } = useParams();
   const [students, setStudents] = useState([]);
@@ -21,9 +21,7 @@ const FullAttendance = ({ apiUrl, user }) => {
   const [allSubjBySect, setAllSubjBySect] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
 
-  const date = new Date().toLocaleDateString("en-CA", {
-    timeZone: "Asia/Manila",
-  });
+  const date = fixDate;
 
   const activeSectionId = section_id || user?.sectionId;
   const numericSectionId = activeSectionId
@@ -44,6 +42,7 @@ const FullAttendance = ({ apiUrl, user }) => {
     }
   }, [numericSectionId, apiUrl, date]);
 
+  // filter student data base on filter button
   const filteredStudents = allAttendances
     .filter((student) => {
       if (statusFilter === "all") return true;
@@ -59,6 +58,15 @@ const FullAttendance = ({ apiUrl, user }) => {
 
       return a.last_name.localeCompare(b.last_name);
     });
+
+  // formattedTime
+  const formattedTime = (time) => {
+    return new Date(`1970-01-01T${time}`).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
 
   console.log(students);
   console.log(user.sectionId);
@@ -121,7 +129,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.all} */}
+                      {statusFilter === "all" ? filteredStudents.length : ""}
                     </span>
                   </button>
                   <button
@@ -141,7 +149,9 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.present} */}
+                      {statusFilter === "present"
+                        ? filteredStudents.length
+                        : ""}
                     </span>
                   </button>
                   <button
@@ -161,7 +171,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.late} */}
+                      {statusFilter === "late" ? filteredStudents.length : ""}
                     </span>
                   </button>
                   <button
@@ -181,7 +191,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                           : "bg-slate-100 text-slate-700"
                       }`}
                     >
-                      {/* {statusCounts.absent} */}
+                      {statusFilter === "absent" ? filteredStudents.length : ""}
                     </span>
                   </button>
                 </div>
@@ -225,7 +235,7 @@ const FullAttendance = ({ apiUrl, user }) => {
                 <div className="w-1/6">
                   {student.time_in ? (
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-100">
-                      {student.time_in}
+                      {formattedTime(student.time_in)}
                     </span>
                   ) : (
                     <span className="text-sm text-slate-400">-</span>

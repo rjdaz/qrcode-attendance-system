@@ -19,7 +19,7 @@ function login($conn) {
     $result = $stmt->get_result();
 
     // to update the password 
-    /* $newpw = password_hash('teacher', PASSWORD_BCRYPT);
+    /* $newpw = password_hash('staff', PASSWORD_BCRYPT);
     $updateStmt = $conn->prepare("UPDATE users SET password = ? WHERE username = ?");
     $updateStmt->bind_param("ss", $newpw, $username);
     $updateStmt->execute();

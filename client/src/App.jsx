@@ -135,7 +135,7 @@ function App() {
           }
         />
         <Route
-          path="/history"
+          path="/history/:section_id?"
           element={
             <RequireAuth>
               <History apiUrl={apiUrl} user={user} setUser={setUser} />

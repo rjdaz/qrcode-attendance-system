@@ -25,6 +25,7 @@
     // attendance table
       include '../components/attendance/getAllAttendanceTable.php';
       include '../components/attendance/getInnerJoinAttAndStdnts.php';
+      include '../components/attendance/getAttendancesPerSubject.php';
     // subjects
       include '../components/subjects/sortingSubjectsBySection.php';
       include '../components/subjects/getAllSubjectsData.php';
@@ -89,6 +90,9 @@
     break;
     case 'getInnerJoinAttAndStdnts':
       getInnerJoinAttAndStdnts($conn);
+    break;
+    case 'getAttendancesPerSubject':
+      getAttendancesPerSubject($conn);
     break;
     //subjects
     case 'sortingSubjectsBySection':

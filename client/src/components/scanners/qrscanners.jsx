@@ -425,7 +425,8 @@ const QRScanner = ({ sectionId, apiUrl, userId, fixDate, fixTime, fixDay }) => {
                   <Users className="h-4 w-4" />
                   <span>View Full Attendance</span>
                 </button>
-                <button className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all duration-200 border border-slate-200 font-medium">
+                <button className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all duration-200 border border-slate-200 font-medium"
+                onClick={() => navigate(`/history/${sectionId}`)}>
                   <Clock className="h-4 w-4" />
                   <span>View Reports</span>
                 </button>

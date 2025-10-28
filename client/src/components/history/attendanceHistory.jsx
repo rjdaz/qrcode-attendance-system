@@ -10,36 +10,62 @@ import {
   BarChart3
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { fetchAttendancesPerSubject } from '../../database/attendance/attendances';
 
-const AttendanceHistory = () => {
+const AttendanceHistory = ({ apiUrl, fixDate }) => {
   const navigate = useNavigate();
-  // Mock classes data - replace with API call
-  
-  // Mock attendance history data - replace with API call
-  
-  // Filter attendance history
-  const filteredHistory = [];
+  const [history, setHistory] = useState([]);
+  const [grouped, setGrouped] = useState([]);
 
-  // Pagination
-  const totalPages = 1;
-  const startIndex = 0;
-  const endIndex = 0;
-  const currentHistory = [];
+  const date = fixDate;
+
+  useEffect(() => {
+    fetchAttendancesPerSubject(apiUrl, setHistory, date);
+  }, [apiUrl, date]);
+
+  useEffect(() => {
+    // Group by section + subject for per-class view
+    const byKey = new Map();
+    history.forEach((row) => {
+      const key = `${row.section_id || row.subject_id}-${row.subject_id}-${row.date}`;
+      if (!byKey.has(key)) {
+        byKey.set(key, {
+          key,
+          date: row.date,
+          sectionId: row.section_id,
+          subjectId: row.subject_id,
+          subjectCode: row.subject_code,
+          subjectName: row.subject_name,
+          total: 0,
+          present: 0,
+          absent: 0,
+          late: 0,
+        });
+      }
+      const g = byKey.get(key);
+      g.total += 1;
+      if (row.status === 'Present') g.present += 1;
+      else if (row.status === 'Late') g.late += 1;
+      else g.absent += 1;
+    });
+    setGrouped(Array.from(byKey.values()));
+  }, [history]);
   
   const handlebacktodashboard = () => {
     navigate("/dashboard");
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
               <button
                 
-                className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
                 onClick={handlebacktodashboard}
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -48,10 +74,10 @@ const AttendanceHistory = () => {
               </button>
             </div>
             <div className="text-center">
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <h1 className="text-xl font-semibold text-gray-900">
                 Attendance History
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500">
                 View and export past attendance records
               </p>
             </div>
@@ -77,29 +103,29 @@ const AttendanceHistory = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Date Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Select Date
               </label>
               <input
                 type="date"
-                value="2024-01-15"
-                
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                value={date}
+                readOnly
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900"
               />
             </div>
 
             {/* Quick Date Range */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Quick Range
               </label>
               <select
-                
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
               >
                 <option value="today">Today</option>
                 <option value="yesterday">Yesterday</option>
@@ -110,12 +136,12 @@ const AttendanceHistory = () => {
 
             {/* Class Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Class
               </label>
               <select
-                
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                disabled
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
               >
                 <option value="all">All Classes</option>
                 <option key={1} value={1}>Introduction to Computer Science</option>
@@ -124,7 +150,7 @@ const AttendanceHistory = () => {
 
             {/* Search */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search
               </label>
               <div className="relative">
@@ -132,8 +158,8 @@ const AttendanceHistory = () => {
                 <input
                   type="text"
                   placeholder="Search classes..."
-                  
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                  disabled
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500"
                 />
               </div>
             </div>
@@ -142,14 +168,14 @@ const AttendanceHistory = () => {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6">
             <div className="flex items-center">
               <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                 <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Total Records</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">5</p>
+                <p className="text-sm font-medium text-gray-500">Total Records</p>
+                <p className="text-2xl font-bold text-gray-900">{history.length}</p>
               </div>
             </div>
           </div>
@@ -198,10 +224,10 @@ const AttendanceHistory = () => {
         </div>
 
         {/* Attendance History Table */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-              <thead className="bg-gray-50 dark:bg-gray-700">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Date
@@ -232,47 +258,37 @@ const AttendanceHistory = () => {
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                {[{
-                  id: 1,
-                  date: '2024-01-15',
-                  className: 'Introduction to Computer Science',
-                  subject: 'CS101',
-                  totalStudents: 45,
-                  present: 38,
-                  absent: 5,
-                  late: 2,
-                  attendanceRate: 84
-                }].map((record) => (
-                  <tr key={record.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      Jan 15, 2024
+              <tbody className="bg-white divide-y divide-gray-200">
+                {grouped.map((row) => (
+                  <tr key={row.key} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {row.date}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      Introduction to Computer Science
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {row.subjectName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      CS101
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      {row.subjectCode}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      45
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {row.total}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600 dark:text-green-400">
-                      38
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                      {row.present}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600 dark:text-red-400">
-                      5
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                      {row.absent}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-600 dark:text-yellow-400">
-                      2
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-yellow-600">
+                      {row.late}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-green-600 bg-green-100 dark:bg-green-900/20`}>
-                        84%
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${((row.present / Math.max(row.total,1)) * 100) >= 75 ? 'text-green-600 bg-green-100' : 'text-yellow-700 bg-yellow-100'}`}>
+                        {Math.round((row.present / Math.max(row.total,1)) * 100)}%
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                      <button className="text-blue-600 hover:text-blue-800 dark:hover:text-blue-400">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <button className="text-blue-600 hover:text-blue-800" onClick={() => navigate(`/attendance/${row.subjectId}`)}>
                         View Details
                       </button>
                     </td>

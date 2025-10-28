@@ -44,3 +44,19 @@ export const innerJoinAttAndStdntsData = async (
   }
 };
 
+// get attendance per subject
+export const fetchAttendancesPerSubject = async (apiUrl, setData, date) => {
+  const url = `${apiUrl}getAttendancesPerSubject`;
+  try {
+    const response = await axios.post(url, { date });
+    if (response.data && response.data.success) {
+      setData(response.data.data || []);
+    } else {
+      setData([]);
+    }
+  } catch (err) {
+    console.error('Error fetching attendances per subject:', err);
+    setData([]);
+  }
+};
+

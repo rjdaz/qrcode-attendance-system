@@ -208,67 +208,67 @@ const FullAttendance = ({ apiUrl, user, fixDate}) => {
               </span>
             </div>
           </div>
-          <div className="divide-y divide-slate-200">
-            {/* Header row */}
-            <div className="hidden md:flex text-xs uppercase tracking-wide text-slate-500 pb-2">
-              <div className="w-1/3">Name</div>
-              <div className="w-1/6">Roll Number</div>
-              <div className="w-1/6">Time In</div>
-              <div className="w-1/6">Time Out</div>
-              <div className="w-1/6">Status</div>
-            </div>
-            {filteredStudents.map((student) => (
-              <div
-                key={`${student.student_id}-${student.roll_number}`}
-                className="py-4 flex items-center justify-between"
-              >
-                <div className="w-1/3">
-                  <p className="font-semibold text-slate-900">
-                    {`${student.last_name}, ${student.first_name} ${student.middle_name}`}
-                  </p>
-                </div>
-                <div className="w-1/6">
-                  <p className="text-sm text-slate-600">
-                    {student.roll_number}
-                  </p>
-                </div>
-                <div className="w-1/6">
-                  {student.time_in ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-100">
-                      {formattedTime(student.time_in)}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-slate-400">-</span>
-                  )}
-                </div>
-                <div className="w-1/6">
-                  {student.time_out ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-sm font-medium border border-indigo-100">
-                      {student.time_out}
-                    </span>
-                  ) : (
-                    <span className="text-sm text-slate-400">-</span>
-                  )}
-                </div>
-                <div className="w-1/6">
-                  {student.status === "Present" && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-green-50 text-green-700 text-sm font-medium border border-green-100">
-                      Present
-                    </span>
-                  )}
-                  {student.status === "Late" && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 text-sm font-medium border border-amber-100">
-                      Late
-                    </span>
-                  )}
-                  {student.status === null && (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 text-sm font-medium border border-rose-100">
-                      Absent
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div className="w-full overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="text-xs uppercase tracking-wide text-slate-500">
+                  <th className="text-left w-1/3 px-3 py-2">Name</th>
+                  <th className="text-left w-1/6 px-3 py-2">Time In</th>
+                  {allSubjBySect.map((subj, idx) => (
+                    <th key={`hdr-${idx}`} className="text-center px-2 py-2 min-w-[100px]">
+                      {subj.subject_name}
+                    </th>
+                  ))}
+                  <th className="text-right px-3 py-2">Time Out</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.map((student) => (
+                  <tr key={`${student.student_id}-${student.roll_number}`} className="border-t border-slate-200">
+                    <td className="px-3 py-3">
+                      <p className="font-semibold text-slate-900">
+                        {`${student.last_name}, ${student.first_name} ${student.middle_name}`}
+                      </p>
+                    </td>
+                    <td className="px-3 py-3">
+                      {student.time_in ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-100">
+                          {formattedTime(student.time_in)}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-slate-400">-</span>
+                      )}
+                    </td>
+                    {allSubjBySect.map((subj, idx) => {
+                      const pick = (student.student_id + idx) % 3; // deterministic mock
+                      const statusLabel = pick === 0 ? "P" : pick === 1 ? "L" : "A";
+                      const style =
+                        statusLabel === "P"
+                          ? "bg-green-50 text-green-700 border-green-200"
+                          : statusLabel === "L"
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-rose-50 text-rose-700 border-rose-200";
+                      return (
+                        <td key={`${student.student_id}-${idx}`} className="px-2 py-3 text-center min-w-[120px]">
+                          <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium border ${style}`}>
+                            {statusLabel}
+                          </span>
+                        </td>
+                      );
+                    })}
+                    <td className="px-3 py-3 text-right">
+                      {student.time_out ? (
+                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-sm font-medium border border-indigo-100">
+                          {student.time_out}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-slate-400">-</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,19 +13,168 @@ import {
   ChevronRight,
   MoreHorizontal,
 } from "lucide-react";
-import {getAllStudentsBySubjects} from '../../database/subjects/subjects';
+import { getAllStudentsBySubjects } from "../../database/subjects/subjects";
+import {
+  innerJoinAttAndStdntsData,
+  addAttendancePerSubject,
+  fetchAttendancesPerSubject,
+} from "../../database/attendance/attendances";
+import { fetchClasses } from "../../database/teachers/teacher_database";
 
-const AttendanceTable = ({ apiUrl, getSubjectId, setGetSubjectId }) => {
+const AttendanceTable = ({
+  user,
+  apiUrl,
+  getSubjectId,
+  setGetSubjectId,
+  fixDate,
+  fixTime,
+}) => {
   const navigate = useNavigate();
+  const [classes, setClasses] = useState([]);
+  const [allAttendances, setAllAttendances] = useState([]);
   const [allStudentsBySubjects, setAllStudentsBySubjects] = useState([]);
+  const [checkedMap, setCheckedMap] = useState({});
+  const [subjectAttendances, setSubjectAttendances] = useState([]);
 
+  const date = fixDate;
+  const time = fixTime;
 
+  // Derive section_id from classes using the current subject id
+  const sectionIdFromClasses = useMemo(() => {
+    if (!classes || !classes.length || !getSubjectId) return undefined;
+    const subjectIdNum = Number(getSubjectId);
+    const match = classes.find(
+      (cls) => Number(cls.subject_id) === subjectIdNum
+    );
+    return match?.section_id;
+  }, [classes, getSubjectId]);
 
+  // 15mins late time
+  const lateTime = useMemo(() => {
+    const getTheSubjectStartTime = classes.find(
+      (c) => Number(c.subject_id) === Number(getSubjectId)
+    );
+    if (!getTheSubjectStartTime) return null;
+    const startTime = getTheSubjectStartTime.start_time;
+    const plus15Mins = new Date(`1970-01-01T${startTime}`);
+    plus15Mins.setMinutes(plus15Mins.getMinutes() + 15);
+    const hours = String(plus15Mins.getHours()).padStart(2, "0");
+    const minutes = String(plus15Mins.getMinutes()).padStart(2, "0");
+    return `${hours}:${minutes}:00`;
+  });
+
+  console.log("Late Time: ", lateTime);
+  // Fetch today's classes for the teacher
   useEffect(() => {
-    getAllStudentsBySubjects(apiUrl, getSubjectId, setAllStudentsBySubjects);
-  }, [apiUrl])
+    fetchClasses(apiUrl, user.userId, setClasses);
+  }, [apiUrl, user.userId]);
 
-  console.log("SectionId: ", getSubjectId);
+  // Fetch students for the selected subject whenever subject changes
+  useEffect(() => {
+    if (!getSubjectId) return;
+    getAllStudentsBySubjects(apiUrl, getSubjectId, setAllStudentsBySubjects);
+  }, [apiUrl, getSubjectId]);
+
+  // Fetch attendances when we have a resolved section id and date
+  useEffect(() => {
+    if (!sectionIdFromClasses || !date) return;
+    innerJoinAttAndStdntsData(
+      apiUrl,
+      setAllAttendances,
+      sectionIdFromClasses,
+      date
+    );
+  }, [apiUrl, sectionIdFromClasses, date]);
+
+  // Fetch per-subject attendance for the date
+  useEffect(() => {
+    if (!date) return;
+    fetchAttendancesPerSubject(apiUrl, setSubjectAttendances, date);
+  }, [apiUrl, date]);
+
+  // Initialize checkedMap from existing per-subject attendance for selected subject
+  useEffect(() => {
+    if (!Array.isArray(subjectAttendances) || !getSubjectId) return;
+    const subjectIdNum = Number(getSubjectId);
+    const byStudent = {};
+    subjectAttendances
+      .filter((row) => Number(row.subject_id) === subjectIdNum)
+      .forEach((row) => {
+        byStudent[row.student_id] = true;
+      });
+    setCheckedMap(byStudent);
+  }, [subjectAttendances, getSubjectId]);
+
+  // formattedTime
+  const formattedTime = (time) => {
+    return new Date(`1970-01-01T${time}`).toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  // handle checkbox change per student
+  const handleSubjectCheckbox = async (student) => {
+    const attendance = allAttendances.find(
+      (att) => att.student_id === student.student_id && att.date === date
+    );
+    if (!attendance) {
+      alert("Please log in first before using the checkbox.");
+      return;
+    }
+    // optimistic toggle
+    setCheckedMap((prev) => ({
+      ...prev,
+      [student.student_id]: !prev[student.student_id],
+    }));
+
+    const status = time > lateTime ? "Late" : "Present";
+
+    // submit record
+    try {
+      const payload = {
+        studentId: student.student_id,
+        subjectId: Number(getSubjectId),
+        teacherId: user.userId,
+        sectionId: sectionIdFromClasses,
+        date,
+        status: status,
+      };
+      const res = await addAttendancePerSubject(apiUrl, payload);
+      if (!res?.success) {
+        alert(res?.message || "Failed to record attendance for subject.");
+        // revert toggle on failure
+        setCheckedMap((prev) => ({
+          ...prev,
+          [student.student_id]: !prev[student.student_id],
+        }));
+      }
+      if (res?.success) {
+        // refresh authoritative list so state persists across navigation
+        fetchAttendancesPerSubject(apiUrl, setSubjectAttendances, date);
+      }
+    } catch (e) {
+      alert("Network error while recording attendance.");
+      setCheckedMap((prev) => ({
+        ...prev,
+        [student.student_id]: !prev[student.student_id],
+      }));
+    }
+  };
+
+  // total of present today
+  const totalPresent =
+    allStudentsBySubjects.length -
+      allAttendances.filter((e) => e.status === "Present") || 0;
+
+  console.log("Subject ID: ", getSubjectId);
+  console.log(allAttendances);
+  console.log(allStudentsBySubjects);
+  console.log("Date: ", fixDate);
+  console.log(classes);
+  console.log(time);
+  console.log("Section ID in Classes: ", sectionIdFromClasses);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -35,7 +184,10 @@ const AttendanceTable = ({ apiUrl, getSubjectId, setGetSubjectId }) => {
           <div className="flex justify-between items-center py-6">
             <div className="flex items-center space-x-4">
               <button
-                onClick={() => navigate("/dashboard")}
+                onClick={() => {
+                  navigate("/dashboard");
+                  setGetSubjectId("");
+                }}
                 className="flex items-center space-x-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 px-3 py-2 rounded-lg transition-all duration-200"
               >
                 <ArrowLeft className="h-5 w-5" />
@@ -44,10 +196,21 @@ const AttendanceTable = ({ apiUrl, getSubjectId, setGetSubjectId }) => {
             </div>
             <div className="text-center">
               <h1 className="text-2xl font-bold text-slate-900">
-                Attendance - Class Name
+                Attendance -{" "}
+                {
+                  classes.find((s) => s.subject_id === Number(getSubjectId))
+                    ?.subject_name
+                }
               </h1>
               <p className="text-slate-600">
-                45 students • 38 present • 5 absent • 2 late
+                {allStudentsBySubjects.length} students •{" "}
+                {
+                  allAttendances.filter(
+                    (a) => a.status === "Present" && a.status === "Late"
+                  ).length
+                }{" "}
+                present • {totalPresent} absent •{" "}
+                {allAttendances.filter((a) => a.status === "Late").length} late
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -81,7 +244,9 @@ const AttendanceTable = ({ apiUrl, getSubjectId, setGetSubjectId }) => {
               </select>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-slate-600">12 of 12 students</span>
+              <span className="text-sm text-slate-600">
+                {allStudentsBySubjects.length} students
+              </span>
               <button className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200">
                 <RefreshCw className="h-4 w-4" />
               </button>
@@ -103,7 +268,13 @@ const AttendanceTable = ({ apiUrl, getSubjectId, setGetSubjectId }) => {
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors">
                     <div className="flex items-center space-x-1">
-                      <span>Name</span>
+                      <span>Last Name</span>
+                      <span className="text-blue-600">↑</span>
+                    </div>
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider cursor-pointer hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center space-x-1">
+                      <span>Gender</span>
                       <span className="text-blue-600">↑</span>
                     </div>
                   </th>
@@ -128,107 +299,111 @@ const AttendanceTable = ({ apiUrl, getSubjectId, setGetSubjectId }) => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {[
-                  {
-                    id: "2023001",
-                    name: "Juan Dela Cruz",
-                    status: "present",
-                    timeScanned: "09:15 AM",
-                    email: "juan.delacruz@email.com",
-                  },
-                ].map((student) => (
-                  <tr
-                    key={student.id}
-                    className="hover:bg-slate-50 transition-colors"
-                  >
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
-                      2023001
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
-                      Juan Dela Cruz
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                      juan.delacruz@email.com
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border text-emerald-600 bg-emerald-50 border-emerald-200`}
+                {allStudentsBySubjects
+                  .sort((a, b) => {
+                    const genderCompare = b.gender.localeCompare(a.gender);
+                    if (genderCompare !== 0) return genderCompare;
+
+                    return a.last_name.localeCompare(b.last_name);
+                  })
+                  .map((student) => {
+                    const attendance = allAttendances.find(
+                      (att) =>
+                        att.student_id === student.student_id &&
+                        att.date === date
+                    );
+
+                    return (
+                      <tr
+                        key={student.student_id}
+                        className="hover:bg-slate-200 transition-colors"
                       >
-                        <CheckCircle className="h-4 w-4" />
-                        <span className="ml-1 capitalize">Present</span>
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                      09:15 AM
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                      <button className="text-slate-400 hover:text-slate-600 transition-colors">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                          {student.roll_number}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {student.last_name}, {student.first_name}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {student.gender.charAt(0).toUpperCase() +
+                            student.gender.slice(1)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                          {student.email}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {attendance ? (
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border text-emerald-600 bg-emerald-50 border-emerald-200`}
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                              <span className="ml-1 capitalize">Present</span>
+                            </span>
+                          ) : (
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border text-red-600 bg-red-50 border-red-200`}
+                            >
+                              <XCircle className="h-4 w-4" />
+                              <span className="ml-1 capitalize">Absent</span>
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                          {attendance?.time_in
+                            ? formattedTime(attendance.time_in)
+                            : "--:--"}
+                        </td>
+                        <td
+                          className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 text-center"
+                          onClick={() => {
+                            if (!attendance) {
+                              alert(
+                                "Please log in first before using the checkbox."
+                              );
+                            }
+                          }}
+                        >
+                          {(() => {
+                            const classData = classes.find(
+                              (c) =>
+                                Number(c.subject_id) === Number(getSubjectId)
+                            );
+                            const isDisabled = classData
+                              ? time > classData.end_time
+                              : false;
+
+                            const notes = isDisabled
+                              ? "Attendance period has ended."
+                              : "";
+                            return (
+                              <div>
+                                <input
+                                  type="checkbox"
+                                  title={notes}
+                                  disabled={isDisabled}
+                                  checked={
+                                    subjectAttendances.some(
+                                      (att) =>
+                                        att.student_id === student.student_id &&
+                                        Number(att.subject_id) ===
+                                          Number(getSubjectId) &&
+                                        att.date === date
+                                    ) || false
+                                  }
+                                  onChange={() =>
+                                    handleSubjectCheckbox(student)
+                                  }
+                                />
+                              </div>
+                            );
+                          })()}
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
-
-          {/* Pagination */}
-          {false && (
-            <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
-              <div className="flex-1 flex justify-between sm:hidden">
-                <button
-                  disabled={true}
-                  className="relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  Previous
-                </button>
-                <button
-                  disabled={true}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                >
-                  Next
-                </button>
-              </div>
-              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm text-slate-700">
-                    Showing <span className="font-medium">1</span> to{" "}
-                    <span className="font-medium">10</span> of{" "}
-                    <span className="font-medium">12</span> results
-                  </p>
-                </div>
-                <div>
-                  <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
-                    <button
-                      disabled={true}
-                      className="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-slate-300 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                    >
-                      <ChevronLeft className="h-5 w-5" />
-                    </button>
-                    {false &&
-                      Array.from({ length: 1 }, (_, i) => i + 1).map((page) => (
-                        <button
-                          key={page}
-                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-all duration-200 ${
-                            false
-                              ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
-                              : "bg-white border-slate-300 text-slate-500 hover:bg-slate-50"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-                    <button
-                      disabled={true}
-                      className="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-slate-300 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                    >
-                      <ChevronRight className="h-5 w-5" />
-                    </button>
-                  </nav>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
         {false && (

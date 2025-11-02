@@ -43,6 +43,7 @@ const Dashboard = ({
   const [allStudents, setAllStudents] = useState([]);
   const [allSubjectData, setAllSubjectData] = useState([]);
   const [allAttendance, setAllAttendance] = useState([]);
+  const [enableButton, setEnableButton] = useState(false);
 
   // get the current date
   const date = fixDate;

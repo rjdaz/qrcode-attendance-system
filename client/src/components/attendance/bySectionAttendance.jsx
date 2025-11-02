@@ -12,14 +12,16 @@ import {
 import { fetchStudentsInSection } from "../../database/teachers/teacher_database";
 import { innerJoinAttAndStdntsData } from "../../database/attendance/attendances";
 import { sortingSubjectsBySection } from "../../database/subjects/subjects";
+import { getAllsubjAttendanceByday } from "../../database/subjectAttendance/attendance_per_subject";
 
-const FullAttendance = ({ apiUrl, user, fixDate}) => {
+const FullAttendance = ({ apiUrl, user, fixDate }) => {
   const navigate = useNavigate();
   const { section_id } = useParams();
   const [students, setStudents] = useState([]);
   const [allAttendances, setAllAttendances] = useState([]);
   const [allSubjBySect, setAllSubjBySect] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [subjAttendance, setSubjAttendance] = useState([]);
 
   const date = fixDate;
 
@@ -39,6 +41,7 @@ const FullAttendance = ({ apiUrl, user, fixDate}) => {
         date
       );
       sortingSubjectsBySection(apiUrl, numericSectionId, setAllSubjBySect);
+      getAllsubjAttendanceByday(apiUrl, setSubjAttendance, date);
     }
   }, [numericSectionId, apiUrl, date]);
 
@@ -72,7 +75,8 @@ const FullAttendance = ({ apiUrl, user, fixDate}) => {
   console.log(user.sectionId);
   console.log(date);
   console.log(allAttendances);
-  console.log(allSubjBySect);
+  console.log("all subject", allSubjBySect);
+  console.log("all subject attendance", subjAttendance);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -215,7 +219,10 @@ const FullAttendance = ({ apiUrl, user, fixDate}) => {
                   <th className="text-left w-1/3 px-3 py-2">Name</th>
                   <th className="text-left w-1/6 px-3 py-2">Time In</th>
                   {allSubjBySect.map((subj, idx) => (
-                    <th key={`hdr-${idx}`} className="text-center px-2 py-2 min-w-[100px]">
+                    <th
+                      key={`hdr-${idx}`}
+                      className="text-center px-2 py-2 min-w-[100px]"
+                    >
                       {subj.subject_name}
                     </th>
                   ))}
@@ -224,7 +231,10 @@ const FullAttendance = ({ apiUrl, user, fixDate}) => {
               </thead>
               <tbody>
                 {filteredStudents.map((student) => (
-                  <tr key={`${student.student_id}-${student.roll_number}`} className="border-t border-slate-200">
+                  <tr
+                    key={`${student.student_id}-${student.roll_number}`}
+                    className="border-t border-slate-200 hover:bg-slate-100"
+                  >
                     <td className="px-3 py-3">
                       <p className="font-semibold text-slate-900">
                         {`${student.last_name}, ${student.first_name} ${student.middle_name}`}
@@ -240,17 +250,42 @@ const FullAttendance = ({ apiUrl, user, fixDate}) => {
                       )}
                     </td>
                     {allSubjBySect.map((subj, idx) => {
-                      const pick = (student.student_id + idx) % 3; // deterministic mock
-                      const statusLabel = pick === 0 ? "P" : pick === 1 ? "L" : "A";
+                      // Determine attendance status for this subject
+                      const attendanceRecord = subjAttendance.find(
+                        (att) =>
+                          att.student_id === student.student_id &&
+                          att.subject_id === subj.subject_id
+                      );
+                      let statusLabel = "-";
+
+                      if (attendanceRecord) {
+                        if (attendanceRecord.status === "Present") {
+                          statusLabel = "P";
+                        } else if (attendanceRecord.status === "Late") {
+                          statusLabel = "L";
+                        } else if (attendanceRecord.status === "Absent") {
+                          statusLabel = "A";
+                        } else {
+                          statusLabel = "";
+                        }
+                      }
+
                       const style =
                         statusLabel === "P"
                           ? "bg-green-50 text-green-700 border-green-200"
                           : statusLabel === "L"
                           ? "bg-amber-50 text-amber-700 border-amber-200"
-                          : "bg-rose-50 text-rose-700 border-rose-200";
+                          : statusLabel === "A"
+                          ? "bg-red-50 text-red-700 border-red-200"
+                          : "bg-slate-50 text-slate-500 border-slate-200";
                       return (
-                        <td key={`${student.student_id}-${idx}`} className="px-2 py-3 text-center min-w-[120px]">
-                          <span className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium border ${style}`}>
+                        <td
+                          key={`${student.student_id}-${idx}`}
+                          className="px-2 py-3 text-center min-w-[120px]"
+                        >
+                          <span
+                            className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium border ${style}`}
+                          >
                             {statusLabel}
                           </span>
                         </td>

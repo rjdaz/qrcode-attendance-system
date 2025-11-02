@@ -41,20 +41,26 @@ export const getAllSubjectData = async (apiUrl, setAllSubjectData) => {
 };
 
 // get all students by subjects
-export const getAllStudentsBySubjects = async (apiUrl, subject_id, setAllStudentsBySubjects) => {
+export const getAllStudentsBySubjects = async (
+  apiUrl,
+  getSubjectId,
+  setAllStudentsBySubjects
+) => {
   const url = `${apiUrl}getAllStudentsBySubjects`;
 
+  console.log(getSubjectId);
   try {
-    const response = await axios.get(url, {
-      subject_id,
+    const response = await axios.post(url, {
+      getSubjectId,
     });
 
-      if (response.data.success) {
-        setAllStudentsBySubjects(response.data.studentsSubjectsData);
-      } else {
-        console.log(response.data.message);
-      }
+    if (response.data.success) {
+      setAllStudentsBySubjects(response.data.studentSubject);
+    } else {
+      console.log(response.data.message);
+      setAllStudentsBySubjects([]);
+    }
   } catch (err) {
     console.log("Error: ", err);
   }
-}
+};

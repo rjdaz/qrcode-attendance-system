@@ -27,15 +27,15 @@ export const innerJoinAttAndStdntsData = async (
   const url = `${apiUrl}getInnerJoinAttAndStdnts`;
 
   try {
-    const responce = await axios.post(url, {
+    const response = await axios.post(url, {
       sectionId,
       date,
     });
 
-    console.log(responce.data)
+    console.log(response.data)
 
-    if (responce.data.success) {
-      setAllAttendances(responce.data.currentAttendances);
+    if (response.data.success) {
+      setAllAttendances(response.data.currentAttendances);
     } else {
       console.log("No fetching Data");
     }
@@ -57,6 +57,18 @@ export const fetchAttendancesPerSubject = async (apiUrl, setData, date) => {
   } catch (err) {
     console.error('Error fetching attendances per subject:', err);
     setData([]);
+  }
+};
+
+// add attendance record for a subject (per-student)
+export const addAttendancePerSubject = async (apiUrl, payload) => {
+  const url = `${apiUrl}attendancePerSubject`;
+  try {
+    const response = await axios.post(url, payload);
+    return response.data;
+  } catch (err) {
+    console.error('Error adding attendance per subject:', err);
+    return { success: false, message: 'Network error' };
   }
 };
 

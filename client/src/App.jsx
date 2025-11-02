@@ -9,7 +9,6 @@ import {
 import Login from "./components/auth/Login";
 import Dashboard from "./components/dashboard/Dashboard";
 import History from "./components/history/attendanceHistory";
-import Reports from "./components/reports/reports";
 import Attendance from "./components/attendance/attendancePerSubjects";
 import Scanner from "./components/scanners/qrscanners";
 import AdminDashboard from "./components/AdminDashboard/AdminLayout";
@@ -144,21 +143,16 @@ function App() {
         />
         <Route />
         <Route
-          path="/reports"
-          element={
-            <RequireAuth>
-              <Reports />
-            </RequireAuth>
-          }
-        />
-        <Route
           path="/attendance/:getSubjectId?"
           element={
             <RequireAuth>
               <Attendance
+                user={user}
                 apiUrl={apiUrl}
                 getSubjectId={getSubjectId}
                 setGetSubjectId={setGetSubjectId}
+                fixDate={fixDate}
+                fixTime={fixTime}
               />
             </RequireAuth>
           }

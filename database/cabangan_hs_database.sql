@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 28, 2025 at 10:46 AM
+-- Generation Time: Nov 02, 2025 at 02:14 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,7 +59,13 @@ INSERT INTO `attendances` (`attendance_id`, `student_id`, `section_id`, `teacher
 (88, 10, 1, 0, '2025-10-26', '13:33:15', NULL, 'Late'),
 (90, 1, 1, 0, '2025-10-26', '20:47:26', NULL, 'Present'),
 (91, 1, 1, 0, '2025-10-28', '13:57:21', '14:13:23', 'Present'),
-(93, 2, 1, 0, '2025-10-28', '15:07:04', NULL, 'Present');
+(93, 2, 1, 0, '2025-10-28', '15:07:04', NULL, 'Present'),
+(94, 1, 1, 0, '2025-10-30', '21:14:06', NULL, 'Late'),
+(95, 1, 1, 0, '2025-10-30', '00:06:31', NULL, 'Present'),
+(96, 2, 1, 0, '2025-10-31', '01:10:07', NULL, 'Present'),
+(97, 1, 1, 0, '2025-10-31', '16:01:49', NULL, 'Late'),
+(98, 1, 1, 0, '2025-11-02', '19:09:41', NULL, 'Late'),
+(99, 2, 1, 0, '2025-11-02', '19:50:25', NULL, 'Late');
 
 -- --------------------------------------------------------
 
@@ -72,6 +78,7 @@ CREATE TABLE `attendances_per_subject` (
   `student_id` int(11) NOT NULL,
   `subject_id` int(11) NOT NULL,
   `teacher_id` int(11) NOT NULL,
+  `section_id` int(11) DEFAULT NULL,
   `date` date NOT NULL DEFAULT current_timestamp(),
   `time` time DEFAULT NULL,
   `status` varchar(255) DEFAULT NULL
@@ -81,18 +88,14 @@ CREATE TABLE `attendances_per_subject` (
 -- Dumping data for table `attendances_per_subject`
 --
 
-INSERT INTO `attendances_per_subject` (`attendances_subjects_id`, `student_id`, `subject_id`, `teacher_id`, `date`, `time`, `status`) VALUES
-(1, 1, 1, 5, '2025-10-28', '17:37:41', 'Present'),
-(12, 1, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(13, 2, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(14, 3, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(15, 4, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(16, 5, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(17, 6, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(18, 7, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(19, 8, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(20, 9, 3, 5, '2025-10-28', '08:00:00', 'Present'),
-(21, 10, 3, 5, '2025-10-28', '08:00:00', 'Present');
+INSERT INTO `attendances_per_subject` (`attendances_subjects_id`, `student_id`, `subject_id`, `teacher_id`, `section_id`, `date`, `time`, `status`) VALUES
+(1, 1, 1, 5, 1, '2025-10-28', '17:37:41', 'Present'),
+(12, 1, 3, 5, 1, '2025-10-28', '08:00:00', 'Present'),
+(13, 2, 3, 5, 1, '2025-10-28', '08:00:00', 'Present'),
+(23, 2, 4, 5, 1, '2025-10-31', '01:58:20', 'Present'),
+(25, 1, 4, 5, 1, '2025-10-31', '16:19:20', 'Late'),
+(26, 1, 3, 5, 1, '2025-11-02', '19:09:51', 'Late'),
+(27, 2, 3, 5, 1, '2025-11-02', '19:52:03', 'Late');
 
 -- --------------------------------------------------------
 
@@ -271,7 +274,7 @@ CREATE TABLE `subjects` (
   `subject_code` varchar(50) NOT NULL,
   `subject_name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `days` enum('Mon, Tue, Thu','Tue','Wed','Thu','Fri','Sun') NOT NULL,
+  `days` enum('Mon, Tue, Thu, Fri','Tue','Wed','Thu','Fri','Sun') NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
   `room_name` varchar(255) NOT NULL,
@@ -287,15 +290,15 @@ CREATE TABLE `subjects` (
 --
 
 INSERT INTO `subjects` (`subject_id`, `subject_code`, `subject_name`, `description`, `days`, `start_time`, `end_time`, `room_name`, `teacher_id`, `department_id`, `section_id`, `created_at`, `updated_at`) VALUES
-(1, 'ENG10INT', 'English', 'English', 'Mon, Tue, Thu', '07:00:00', '08:00:00', 'Integrity', 5, 3, 2, '2025-09-21 22:51:21', '2025-10-13 20:17:23'),
+(1, 'ENG10INT', 'English', 'English', 'Mon, Tue, Thu, Fri', '07:00:00', '08:00:00', 'Integrity', 5, 3, 2, '2025-09-21 22:51:21', '2025-10-31 01:34:41'),
 (3, 'ENG10CUR', 'English', 'English', 'Sun', '08:00:00', '09:00:00', 'Curie', 5, 3, 1, '2025-09-23 18:58:28', '2025-10-26 12:27:03'),
-(4, 'FIL10CUR', 'Filipino', 'Filipino', 'Mon, Tue, Thu', '16:00:00', '17:00:00', 'Curie', 5, 3, 1, '2025-10-20 23:01:24', '2025-10-28 15:05:53'),
-(5, 'MAP10CUR', 'MAPEH', 'MAPEH', 'Mon, Tue, Thu', '09:00:00', '10:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:49:39', '2025-10-28 15:50:10'),
-(6, 'SCI10CUR', 'Science', 'Science', 'Mon, Tue, Thu', '11:00:00', '12:00:00', 'CURIE', 5, 3, 1, '2025-10-28 15:53:01', '2025-10-28 15:53:01'),
-(7, 'ESP10CUR', 'ESP', 'ESP', 'Mon, Tue, Thu', '12:00:00', '13:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:54:16', '2025-10-28 15:54:16'),
-(8, 'TLE10CUR', 'TLE', 'TLE', 'Mon, Tue, Thu', '13:00:00', '14:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:24:47', '2025-10-28 16:24:47'),
-(9, 'AP10CUR', 'AP', 'AP', 'Mon, Tue, Thu', '14:00:00', '15:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:26:36', '2025-10-28 16:26:36'),
-(10, 'MTH10CUR', 'Math', 'Math', 'Mon, Tue, Thu', '15:00:00', '16:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:28:51', '2025-10-28 16:28:51');
+(4, 'FIL10CUR', 'Filipino', 'Filipino', 'Mon, Tue, Thu, Fri', '16:00:00', '17:00:00', 'Curie', 5, 3, 1, '2025-10-20 23:01:24', '2025-10-31 00:04:06'),
+(5, 'MAP10CUR', 'MAPEH', 'MAPEH', 'Mon, Tue, Thu, Fri', '09:00:00', '10:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:49:39', '2025-10-31 00:04:13'),
+(6, 'SCI10CUR', 'Science', 'Science', 'Mon, Tue, Thu, Fri', '11:00:00', '12:00:00', 'CURIE', 5, 3, 1, '2025-10-28 15:53:01', '2025-10-31 00:04:20'),
+(7, 'ESP10CUR', 'ESP', 'ESP', 'Mon, Tue, Thu, Fri', '12:00:00', '13:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:54:16', '2025-10-31 00:04:26'),
+(8, 'TLE10CUR', 'TLE', 'TLE', 'Mon, Tue, Thu, Fri', '13:00:00', '14:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:24:47', '2025-10-31 00:04:32'),
+(9, 'AP10CUR', 'AP', 'AP', 'Mon, Tue, Thu, Fri', '14:00:00', '15:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:26:36', '2025-10-31 00:04:38'),
+(10, 'MTH10CUR', 'Math', 'Math', 'Mon, Tue, Thu, Fri', '15:00:00', '16:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:28:51', '2025-10-31 00:04:45');
 
 -- --------------------------------------------------------
 
@@ -329,10 +332,10 @@ INSERT INTO `users` (`users_id`, `employee_no`, `username`, `password`, `first_n
 (1, 'E250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-23 18:14:26', '2025-09-18 22:58:56', '2025-10-26 10:07:52', 'active'),
 (2, 'E250002', 'sysAdmSupport01', '$2y$10$Rytkpm9LZAHP0iXrOu5tCeL2qRHS64UOiFAL0am0gEMoj37KIm4jm', 'Joyce Mariane', 'Dagsil', 'joycemariane@gmail.com', '09171234567', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:11:48', '2025-10-26 10:08:00', 'active'),
 (3, 'E250003', 'sysAdmSupport02', '$2y$10$UeJlioPdNMo4GdyvGsLnfuAu3PbpOzEcWGd.h5ZOjLJ/7G2pfd92i', 'Roince', 'Jumao-as', 'roince@gmail.com', '09123456789', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:16:43', '2025-10-26 10:08:09', 'active'),
-(4, 'E250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-10-28 14:53:49', '2025-09-18 23:28:16', '2025-10-28 14:53:49', 'active'),
-(5, 'E250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-10-28 15:45:24', '2025-09-18 23:40:56', '2025-10-28 15:45:24', 'active'),
+(4, 'E250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-10-28 17:57:05', '2025-09-18 23:28:16', '2025-10-28 17:57:05', 'active'),
+(5, 'E250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-11-02 18:49:16', '2025-09-18 23:40:56', '2025-11-02 18:49:16', 'active'),
 (7, 'E250006', 'Teacher02', '$2y$10$/bbtkieNFlK3x9pBYbjv8eJL/FOyofhrEzSiznFEL8wSHJZNFcSKy', 'Juan', 'Dela Cruz', 'delaCruz1@gmail.com', '09171234566', 'Teacher', 3, 2, '2025-10-12 18:53:36', '2025-10-02 20:56:04', '2025-10-26 10:08:38', 'active'),
-(8, 'E250007', 'Staff01', '$2y$10$KQTRANiD3pDQV.cPvn4pXe8s1IokTlXmYKUKe1UNmZysRxyTCGPA6', 'Rhyan', 'Orosco', 'orosco@gmail.com', '09987456123', 'staff', 5, 1, '2025-10-28 15:45:08', '2025-10-26 10:10:13', '2025-10-28 15:45:08', 'active');
+(8, 'E250007', 'Staff01', '$2y$10$KQTRANiD3pDQV.cPvn4pXe8s1IokTlXmYKUKe1UNmZysRxyTCGPA6', 'Rhyan', 'Orosco', 'orosco@gmail.com', '09987456123', 'staff', 5, 1, '2025-10-28 17:57:59', '2025-10-26 10:10:13', '2025-10-28 17:57:59', 'active');
 
 --
 -- Indexes for dumped tables
@@ -351,7 +354,8 @@ ALTER TABLE `attendances_per_subject`
   ADD PRIMARY KEY (`attendances_subjects_id`),
   ADD KEY `fk_subject_id_aps` (`student_id`),
   ADD KEY `fk_teacher_id_aps` (`teacher_id`),
-  ADD KEY `subject_id` (`subject_id`);
+  ADD KEY `subject_id` (`subject_id`),
+  ADD KEY `fk_section_aps` (`section_id`);
 
 --
 -- Indexes for table `department`
@@ -426,13 +430,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `attendances`
 --
 ALTER TABLE `attendances`
-  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
+  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
 
 --
 -- AUTO_INCREMENT for table `attendances_per_subject`
 --
 ALTER TABLE `attendances_per_subject`
-  MODIFY `attendances_subjects_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `attendances_subjects_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `department`
@@ -490,6 +494,7 @@ ALTER TABLE `users`
 -- Constraints for table `attendances_per_subject`
 --
 ALTER TABLE `attendances_per_subject`
+  ADD CONSTRAINT `fk_section_aps` FOREIGN KEY (`section_id`) REFERENCES `section` (`section_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_student_id_aps` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_subject_id_aps` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_teacher_id_aps` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`users_id`) ON DELETE CASCADE ON UPDATE CASCADE;

@@ -4,23 +4,27 @@
         
     $data = json_decode(file_get_contents("php://input"), true);
 
-    $section_id = $data['subject_id'];
+    $section_id = $data['getSubjectId'];
 
-    $stmt = $conn->prepare("SELECT
-                              st.student_id,
-                              st.first_name,
-                              st.last_name,
-                              st.middle_name,
-                              st.gender,
-                              sb.subject_code,
-                              sb.subject_name,
-                              sb.teacher_id
-                            FROM students st
-                            LEFT JOIN subjects sb
-                            ON st.section = sb.section_id 
-                            WHERE sb.section_id
-    ");
+$stmt = $conn->prepare("SELECT DISTINCT
+                          st.student_id,
+                          st.first_name,
+                          st.last_name,
+                          st.middle_name,
+                          st.gender,
+                          st.email,
+                          st.roll_number,
+                          sb.subject_id,
+                          sb.subject_code,
+                          sb.subject_name,
+                          sb.teacher_id
+                        FROM students st
+                        INNER JOIN subjects sb ON st.section = sb.section_id
+                        WHERE sb.subject_id = ?
+                        GROUP BY st.student_id
+");
     $stmt->bind_param('i', $section_id);
+    $stmt->execute();
     $result = $stmt->get_result();
 
     $studentsSubject = [];
@@ -32,7 +36,7 @@
 
         echo json_encode(['success' => true, 'studentSubject' => $studentsSubject]);
       } else {
-        echo json_encode(['success' => false, 'message' => 'No fetched Data!']);
+        echo json_encode(['success' => false, 'message' => 'No fetched Data!', 'studentSubject' => []]);
       }
 
     $stmt->close();

@@ -77,7 +77,7 @@ const GuardScanner = ({
     fetchStudents(apiUrl, setAllStudents);
     getAllattendanceTable(apiUrl, setAllAttendance);
     sortingSubjectsBySection(apiUrl, sectionId, setAllSubjBySect);
-  }, [apiUrl]);
+  }, [apiUrl, sectionId]);
 
   // sort by start time
   const sortingByStartTimeAndDay = allSubjBySect
@@ -91,10 +91,14 @@ const GuardScanner = ({
   const newTime = time.toTimeString().split(" ")[0];
 
   console.log(allStudents);
+  console.log(sectionId); 
   console.log(date);
   console.log(attendanceType);
   console.log(sortingByStartTimeAndDay);
   console.log(allSubjBySect);
+  console.log(startTime)
+  console.log(newTime);
+  console.log(sortingByStartTimeAndDay?.[0]?.start_time);
   /*
   useEffect(() => {
     const containerId = "guard-qr-reader";

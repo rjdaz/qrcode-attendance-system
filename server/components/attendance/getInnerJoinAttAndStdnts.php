@@ -4,6 +4,15 @@
 
     $data = json_decode(file_get_contents("php://input"), true);
 
+     if (!$data || !isset($data['sectionId']) || !isset($data['date'])) {
+      echo json_encode([
+        'success' => false,
+        'currentAttendances' => [],
+        'messages' => 'Missing required parameters: sectionId and date are required'
+      ]);
+      return;
+    }
+
     $sectionId = $data['sectionId'];
     $date = $data['date'];
 

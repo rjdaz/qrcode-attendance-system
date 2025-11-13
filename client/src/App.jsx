@@ -15,6 +15,7 @@ import AdminDashboard from "./components/AdminDashboard/AdminLayout";
 import GuardScanner from "./components/staff/studentLoginAndLogOut";
 import BySectionAttendance from "./components/attendance/bySectionAttendance";
 import { getFixedDate } from "./database/fix_date/fixDate.js";
+import ViewDetailsReportsPerSubject from "./components/attendance/ViewDetailsReportPerSubject.jsx";
 
 //const apiUrl = import.meta.env.VITE_API_URL;
 const apiUrl =
@@ -49,12 +50,17 @@ function App() {
     return localStorage.getItem("getSubjectId") || "";
   });
 
+  const [getDatePrevSubject, setGetDatePrevSubject] = useState(() => {
+    return localStorage.getItem("getDatePrevSubject");
+  })
+
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {
     localStorage.setItem("loginStatus", loginStatus);
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("getSubjectId", getSubjectId);
-  }, [loginStatus, user, getSubjectId]);
+    localStorage.setItem("getDatePrevSubject", getDatePrevSubject);
+  }, [loginStatus, user, getSubjectId, getDatePrevSubject]);
 
   useEffect(() => {
     // initial fetch
@@ -137,11 +143,34 @@ function App() {
           path="/history/:section_id?"
           element={
             <RequireAuth>
-              <History apiUrl={apiUrl} user={user} setUser={setUser} />
+              <History
+                apiUrl={apiUrl}
+                fixDate={fixDate}
+                userId={user?.userId}
+                setGetSubjectId={setGetSubjectId}
+                setGetDatePrevSubject={setGetDatePrevSubject}
+              />
             </RequireAuth>
           }
         />
         <Route />
+        <Route
+          path="/view-details/:getSubjectId?"
+          element={
+            <RequireAuth>
+              <ViewDetailsReportsPerSubject
+                user={user}
+                apiUrl={apiUrl}
+                getSubjectId={getSubjectId}
+                setGetSubjectId={setGetSubjectId}
+                fixDate={fixDate}
+                fixTime={fixTime}
+                getDatePrevSubject={getDatePrevSubject}
+                setGetDatePrevSubject={setGetDatePrevSubject}
+              />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/attendance/:getSubjectId?"
           element={

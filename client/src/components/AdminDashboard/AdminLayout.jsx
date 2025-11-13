@@ -89,6 +89,8 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
     subject: "",
     phone: "",
   });
+  const [notifications, setNotifications] = useState([]);
+  const [notifLoading, setNotifLoading] = useState(false);
 
   // Fetch students from database
   const fetchStudents = async () => {
@@ -155,6 +157,29 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
     fetchStudentStats();
     fetchStudents();
   }, []);
+
+  // Fetch notifications
+  const fetchNotifications = async () => {
+    try {
+      setNotifLoading(true);
+      const res = await axios.get(`${apiUrl}getNotifications`);
+      if (res.data?.success) {
+        setNotifications(res.data.data || []);
+      } else {
+        setNotifications([]);
+      }
+    } catch (e) {
+      setNotifications([]);
+    } finally {
+      setNotifLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedManagement === "notification") {
+      fetchNotifications();
+    }
+  }, [selectedManagement]);
 
   // Filter students by search text (checks name and section)
   const filteredStudents = students.filter((s) => {
@@ -1040,6 +1065,9 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                   </h2>
                 </div>
                 <div className="flex items-center space-x-2">
+                  <button onClick={fetchNotifications} className="px-3 py-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50">
+                    <RefreshCw className="h-4 w-4" />
+                  </button>
                   <button className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-xl text-sm font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all shadow">
                     Re-send Failed SMS
                   </button>
@@ -1068,28 +1096,41 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-200">
-                      <tr className="hover:bg-slate-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
-                          0917 987 6543
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          Juan Dela Cruz
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-rose-700 bg-rose-50 border-rose-200">
-                            <XCircle className="h-4 w-4" />
-                            <span className="ml-1">Failed</span>
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          09:15 AM
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          <button className="text-slate-400 hover:text-slate-600">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
+                      {notifLoading ? (
+                        <tr>
+                          <td className="px-6 py-4 text-sm text-slate-600" colSpan="5">Loading notifications...</td>
+                        </tr>
+                      ) : notifications.length === 0 ? (
+                        <tr>
+                          <td className="px-6 py-4 text-sm text-slate-600" colSpan="5">No notifications yet.</td>
+                        </tr>
+                      ) : (
+                        notifications.map((n) => (
+                          <tr key={n.notification_id} className="hover:bg-slate-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">{n.parents_number || '-'}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{n.student_name || `Student #${n.student_id}`}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              {n.status === 'Successful' ? (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-emerald-600 bg-emerald-50 border-emerald-200">
+                                  <CheckCircle className="h-4 w-4" />
+                                  <span className="ml-1">Successful</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-amber-700 bg-amber-50 border-amber-200">
+                                  <AlertCircle className="h-4 w-4" />
+                                  <span className="ml-1">Pending</span>
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">{n.date} {n.time}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                              <button className="text-slate-400 hover:text-slate-600">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>

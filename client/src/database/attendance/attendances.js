@@ -72,3 +72,24 @@ export const addAttendancePerSubject = async (apiUrl, payload) => {
   }
 };
 
+// get all attendance per subject records of a teacher
+export const fetchAllAttendancePerSubjectByTeacher = async (apiUrl, setData, teacherId) => {
+  const url = `${apiUrl}getAllAttendancePerSubjectByTeacher`;
+
+  try {
+    const response = await axios.post(url, {
+      teacherId,
+    })
+
+    if (response.data.success) {
+      setData(response.data.attendancesByTeacher);
+    } else {
+      setData([]);
+      console.log(response.data.message);
+    }
+  } catch (err) {
+    console.error("Error fetching attendance records:", err);
+    setData([]);
+  }
+}
+

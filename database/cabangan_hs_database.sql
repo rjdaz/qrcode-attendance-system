@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 02, 2025 at 02:14 PM
+-- Generation Time: Nov 04, 2025 at 10:30 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -65,7 +65,13 @@ INSERT INTO `attendances` (`attendance_id`, `student_id`, `section_id`, `teacher
 (96, 2, 1, 0, '2025-10-31', '01:10:07', NULL, 'Present'),
 (97, 1, 1, 0, '2025-10-31', '16:01:49', NULL, 'Late'),
 (98, 1, 1, 0, '2025-11-02', '19:09:41', NULL, 'Late'),
-(99, 2, 1, 0, '2025-11-02', '19:50:25', NULL, 'Late');
+(99, 2, 1, 0, '2025-11-02', '19:50:25', NULL, 'Late'),
+(100, 8, 1, 0, '2025-11-02', '21:51:53', NULL, 'Late'),
+(101, 1, 1, 0, '2025-11-04', '14:14:06', '14:24:24', 'Late'),
+(102, 3, 1, 0, '2025-11-04', '14:14:15', NULL, 'Late'),
+(104, 4, 1, 0, '2025-11-04', '14:22:36', NULL, 'Late'),
+(106, 5, 1, 0, '2025-11-04', '15:14:59', NULL, 'Present'),
+(114, 2, 1, 0, '2025-11-04', '16:52:29', '17:29:33', 'Present');
 
 -- --------------------------------------------------------
 
@@ -95,7 +101,12 @@ INSERT INTO `attendances_per_subject` (`attendances_subjects_id`, `student_id`, 
 (23, 2, 4, 5, 1, '2025-10-31', '01:58:20', 'Present'),
 (25, 1, 4, 5, 1, '2025-10-31', '16:19:20', 'Late'),
 (26, 1, 3, 5, 1, '2025-11-02', '19:09:51', 'Late'),
-(27, 2, 3, 5, 1, '2025-11-02', '19:52:03', 'Late');
+(27, 2, 3, 5, 1, '2025-11-02', '19:52:03', 'Present'),
+(28, 8, 3, 5, 1, '2025-11-02', '21:52:07', 'Late'),
+(29, 1, 9, 5, 1, '2025-11-04', '14:16:02', 'Present'),
+(30, 3, 9, 5, 1, '2025-11-04', '14:16:04', 'Present'),
+(31, 2, 9, 5, 1, '2025-11-04', '14:16:44', 'Present'),
+(32, 4, 9, 5, 1, '2025-11-04', '14:22:44', 'Late');
 
 -- --------------------------------------------------------
 
@@ -145,6 +156,36 @@ INSERT INTO `gradelevel` (`grade_level_id`, `grade_name`, `created_at`, `updated
 (4, 'Grade 10', '2025-09-19 23:56:10', '2025-09-19 23:56:10'),
 (5, 'Grade 11', '2025-09-19 23:56:27', '2025-09-19 23:56:27'),
 (6, 'Grade 12', '2025-09-19 23:56:27', '2025-09-19 23:56:27');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `notifications`
+--
+
+CREATE TABLE `notifications` (
+  `notification_id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `parents_number` varchar(255) NOT NULL,
+  `messages` text NOT NULL,
+  `date` date NOT NULL,
+  `time` time NOT NULL,
+  `notification_label` varchar(255) NOT NULL,
+  `status` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `notifications`
+--
+
+INSERT INTO `notifications` (`notification_id`, `student_id`, `parents_number`, `messages`, `date`, `time`, `notification_label`, `status`) VALUES
+(3, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 15:28:45 on 2025-11-04.', '2025-11-04', '15:28:45', '', 'Pending'),
+(4, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 15:32:04 on 2025-11-04.', '2025-11-04', '15:32:04', '', 'Pending'),
+(5, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:04:24 on 2025-11-04.', '2025-11-04', '16:04:24', '', 'Pending'),
+(6, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:09:48 on 2025-11-04.', '2025-11-04', '16:09:48', '', 'Pending'),
+(7, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:18:57 on 2025-11-04.', '2025-11-04', '16:18:57', '', 'Pending'),
+(8, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:43:34 on 2025-11-04.', '2025-11-04', '16:43:34', '', 'Pending'),
+(9, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:52:29 on 2025-11-04.', '2025-11-04', '16:52:29', '', 'Pending');
 
 -- --------------------------------------------------------
 
@@ -229,7 +270,7 @@ CREATE TABLE `students` (
 
 INSERT INTO `students` (`student_id`, `roll_number`, `first_name`, `last_name`, `middle_name`, `email`, `phone_number`, `date_of_birth`, `gender`, `address`, `enrollment_date`, `status`, `grade_level`, `section`, `organization_id`, `created_at`, `updated_at`) VALUES
 (1, 'S202501', 'Ryan Jake', 'Daz', 'Guiriba', 'daz@gmail.com', '09123456789', '1995-10-22', 'male', 'P1 It-ba Manito Albay', '2025-09-29', 'active', 1, 1, 1, '2025-09-29 14:13:42', '2025-09-29 14:13:42'),
-(2, 'S250002', 'Roince', 'Jumao-as', 'R', 'roince@gmail.com', '09123456789', '2005-10-21', 'male', 'Donsol, Sorsogon City', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:15:43', '2025-10-08 17:15:43'),
+(2, 'S250002', 'Roince', 'Jumao-as', 'R', 'roince@gmail.com', '09542440254', '2005-10-21', 'male', 'Donsol, Sorsogon City', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:15:43', '2025-11-04 14:44:51'),
 (3, 'S250003', 'Angelica', 'Reyes', 'M', 'angelica.reyes@gmail.com', '09123456780', '2006-03-15', 'female', 'Legazpi City, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
 (4, 'S250004', 'Mark', 'Villanueva', 'T', 'mark.villanueva@gmail.com', '09123456781', '2006-07-22', 'male', 'Daraga, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
 (5, 'S250005', 'Kristine', 'Gomez', 'B', 'kristine.gomez@gmail.com', '09123456782', '2005-12-10', 'female', 'Sto. Domingo, Albay', '2025-10-08', 'active', 1, 1, 1, '2025-10-08 17:20:53', '2025-10-08 17:20:53'),
@@ -332,10 +373,10 @@ INSERT INTO `users` (`users_id`, `employee_no`, `username`, `password`, `first_n
 (1, 'E250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-23 18:14:26', '2025-09-18 22:58:56', '2025-10-26 10:07:52', 'active'),
 (2, 'E250002', 'sysAdmSupport01', '$2y$10$Rytkpm9LZAHP0iXrOu5tCeL2qRHS64UOiFAL0am0gEMoj37KIm4jm', 'Joyce Mariane', 'Dagsil', 'joycemariane@gmail.com', '09171234567', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:11:48', '2025-10-26 10:08:00', 'active'),
 (3, 'E250003', 'sysAdmSupport02', '$2y$10$UeJlioPdNMo4GdyvGsLnfuAu3PbpOzEcWGd.h5ZOjLJ/7G2pfd92i', 'Roince', 'Jumao-as', 'roince@gmail.com', '09123456789', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:16:43', '2025-10-26 10:08:09', 'active'),
-(4, 'E250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-10-28 17:57:05', '2025-09-18 23:28:16', '2025-10-28 17:57:05', 'active'),
-(5, 'E250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-11-02 18:49:16', '2025-09-18 23:40:56', '2025-11-02 18:49:16', 'active'),
+(4, 'E250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-11-04 16:53:01', '2025-09-18 23:28:16', '2025-11-04 16:53:01', 'active'),
+(5, 'E250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-11-04 16:18:12', '2025-09-18 23:40:56', '2025-11-04 16:18:12', 'active'),
 (7, 'E250006', 'Teacher02', '$2y$10$/bbtkieNFlK3x9pBYbjv8eJL/FOyofhrEzSiznFEL8wSHJZNFcSKy', 'Juan', 'Dela Cruz', 'delaCruz1@gmail.com', '09171234566', 'Teacher', 3, 2, '2025-10-12 18:53:36', '2025-10-02 20:56:04', '2025-10-26 10:08:38', 'active'),
-(8, 'E250007', 'Staff01', '$2y$10$KQTRANiD3pDQV.cPvn4pXe8s1IokTlXmYKUKe1UNmZysRxyTCGPA6', 'Rhyan', 'Orosco', 'orosco@gmail.com', '09987456123', 'staff', 5, 1, '2025-10-28 17:57:59', '2025-10-26 10:10:13', '2025-10-28 17:57:59', 'active');
+(8, 'E250007', 'Staff01', '$2y$10$KQTRANiD3pDQV.cPvn4pXe8s1IokTlXmYKUKe1UNmZysRxyTCGPA6', 'Rhyan', 'Orosco', 'orosco@gmail.com', '09987456123', 'staff', 5, 1, '2025-11-04 17:29:18', '2025-10-26 10:10:13', '2025-11-04 17:29:18', 'active');
 
 --
 -- Indexes for dumped tables
@@ -370,6 +411,13 @@ ALTER TABLE `department`
 ALTER TABLE `gradelevel`
   ADD PRIMARY KEY (`grade_level_id`),
   ADD UNIQUE KEY `grade_name` (`grade_name`);
+
+--
+-- Indexes for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD PRIMARY KEY (`notification_id`),
+  ADD KEY `fk_student_id_notif` (`student_id`);
 
 --
 -- Indexes for table `organization`
@@ -430,13 +478,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `attendances`
 --
 ALTER TABLE `attendances`
-  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=100;
+  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
 
 --
 -- AUTO_INCREMENT for table `attendances_per_subject`
 --
 ALTER TABLE `attendances_per_subject`
-  MODIFY `attendances_subjects_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `attendances_subjects_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `department`
@@ -449,6 +497,12 @@ ALTER TABLE `department`
 --
 ALTER TABLE `gradelevel`
   MODIFY `grade_level_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `notifications`
+--
+ALTER TABLE `notifications`
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `organization`
@@ -498,6 +552,12 @@ ALTER TABLE `attendances_per_subject`
   ADD CONSTRAINT `fk_student_id_aps` FOREIGN KEY (`student_id`) REFERENCES `students` (`student_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_subject_id_aps` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`subject_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_teacher_id_aps` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`users_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `notifications`
+--
+ALTER TABLE `notifications`
+  ADD CONSTRAINT `fk_student_id_notif` FOREIGN KEY (`student_id`) REFERENCES `section` (`section_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `section`

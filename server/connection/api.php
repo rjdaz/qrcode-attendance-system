@@ -32,9 +32,12 @@
       include '../components/subjects/getAllStudentsBySubjects.php';
     // users
       include '../components/users_data/getUserData.php';
+    // notifications
+      include '../components/users_data/getNotifications.php';
     // attendances per subject
       include '../components/student_subj_att/attendancePerSubject.php';
       include '../components/student_subj_att/getAllsubjAttendanceByday.php';
+      include '../components/student_subj_att/getAllAttendancePerSubjectByTeacher.php';
 
   $action = isset($_GET['action']) ? $_GET['action'] : '';
 
@@ -44,6 +47,9 @@
     break;
     case 'getUserData':
       getUserData($conn);
+    break;
+    case 'getNotifications':
+      getNotifications($conn);
     break;
     case 'login': // log in
       login($conn);
@@ -113,6 +119,9 @@
     break;
     case 'getAllsubjAttendanceByday':
       getAllsubjAttendanceByday($conn);
+    break;
+    case 'getAllAttendancePerSubjectByTeacher':
+      getAllAttendancePerSubjectByTeacher($conn);
     break;
     default:
       echo "Invalid action"; 

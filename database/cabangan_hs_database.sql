@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 04, 2025 at 10:30 AM
+-- Generation Time: Nov 13, 2025 at 05:08 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -71,7 +71,7 @@ INSERT INTO `attendances` (`attendance_id`, `student_id`, `section_id`, `teacher
 (102, 3, 1, 0, '2025-11-04', '14:14:15', NULL, 'Late'),
 (104, 4, 1, 0, '2025-11-04', '14:22:36', NULL, 'Late'),
 (106, 5, 1, 0, '2025-11-04', '15:14:59', NULL, 'Present'),
-(114, 2, 1, 0, '2025-11-04', '16:52:29', '17:29:33', 'Present');
+(115, 2, 1, 0, '2025-11-04', '17:38:11', NULL, 'Present');
 
 -- --------------------------------------------------------
 
@@ -95,7 +95,7 @@ CREATE TABLE `attendances_per_subject` (
 --
 
 INSERT INTO `attendances_per_subject` (`attendances_subjects_id`, `student_id`, `subject_id`, `teacher_id`, `section_id`, `date`, `time`, `status`) VALUES
-(1, 1, 1, 5, 1, '2025-10-28', '17:37:41', 'Present'),
+(1, 12, 1, 5, 2, '2025-10-28', '17:37:41', 'Present'),
 (12, 1, 3, 5, 1, '2025-10-28', '08:00:00', 'Present'),
 (13, 2, 3, 5, 1, '2025-10-28', '08:00:00', 'Present'),
 (23, 2, 4, 5, 1, '2025-10-31', '01:58:20', 'Present'),
@@ -185,7 +185,8 @@ INSERT INTO `notifications` (`notification_id`, `student_id`, `parents_number`, 
 (6, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:09:48 on 2025-11-04.', '2025-11-04', '16:09:48', '', 'Pending'),
 (7, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:18:57 on 2025-11-04.', '2025-11-04', '16:18:57', '', 'Pending'),
 (8, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:43:34 on 2025-11-04.', '2025-11-04', '16:43:34', '', 'Pending'),
-(9, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:52:29 on 2025-11-04.', '2025-11-04', '16:52:29', '', 'Pending');
+(9, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 16:52:29 on 2025-11-04.', '2025-11-04', '16:52:29', '', 'Pending'),
+(10, 2, '09542440254', 'Cabangan HS: Roince R Jumao-as has arrived and timed-in at 17:38:11 on 2025-11-04.', '2025-11-04', '17:38:11', '', 'Pending');
 
 -- --------------------------------------------------------
 
@@ -315,7 +316,7 @@ CREATE TABLE `subjects` (
   `subject_code` varchar(50) NOT NULL,
   `subject_name` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `days` enum('Mon, Tue, Thu, Fri','Tue','Wed','Thu','Fri','Sun') NOT NULL,
+  `days` enum('Mon, Tue, Wed, Thu, Fri','Tue','Wed','Thu','Fri','Sun') NOT NULL,
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
   `room_name` varchar(255) NOT NULL,
@@ -331,15 +332,15 @@ CREATE TABLE `subjects` (
 --
 
 INSERT INTO `subjects` (`subject_id`, `subject_code`, `subject_name`, `description`, `days`, `start_time`, `end_time`, `room_name`, `teacher_id`, `department_id`, `section_id`, `created_at`, `updated_at`) VALUES
-(1, 'ENG10INT', 'English', 'English', 'Mon, Tue, Thu, Fri', '07:00:00', '08:00:00', 'Integrity', 5, 3, 2, '2025-09-21 22:51:21', '2025-10-31 01:34:41'),
-(3, 'ENG10CUR', 'English', 'English', 'Sun', '08:00:00', '09:00:00', 'Curie', 5, 3, 1, '2025-09-23 18:58:28', '2025-10-26 12:27:03'),
-(4, 'FIL10CUR', 'Filipino', 'Filipino', 'Mon, Tue, Thu, Fri', '16:00:00', '17:00:00', 'Curie', 5, 3, 1, '2025-10-20 23:01:24', '2025-10-31 00:04:06'),
-(5, 'MAP10CUR', 'MAPEH', 'MAPEH', 'Mon, Tue, Thu, Fri', '09:00:00', '10:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:49:39', '2025-10-31 00:04:13'),
-(6, 'SCI10CUR', 'Science', 'Science', 'Mon, Tue, Thu, Fri', '11:00:00', '12:00:00', 'CURIE', 5, 3, 1, '2025-10-28 15:53:01', '2025-10-31 00:04:20'),
-(7, 'ESP10CUR', 'ESP', 'ESP', 'Mon, Tue, Thu, Fri', '12:00:00', '13:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:54:16', '2025-10-31 00:04:26'),
-(8, 'TLE10CUR', 'TLE', 'TLE', 'Mon, Tue, Thu, Fri', '13:00:00', '14:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:24:47', '2025-10-31 00:04:32'),
-(9, 'AP10CUR', 'AP', 'AP', 'Mon, Tue, Thu, Fri', '14:00:00', '15:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:26:36', '2025-10-31 00:04:38'),
-(10, 'MTH10CUR', 'Math', 'Math', 'Mon, Tue, Thu, Fri', '15:00:00', '16:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:28:51', '2025-10-31 00:04:45');
+(1, 'ENG10INT', 'English', 'English', 'Mon, Tue, Wed, Thu, Fri', '07:00:00', '08:00:00', 'Integrity', 7, 3, 2, '2025-09-21 22:51:21', '2025-11-13 22:58:12'),
+(3, 'ENG10CUR', 'English', 'English', 'Sun', '08:00:00', '09:00:00', 'Curie', 7, 3, 1, '2025-09-23 18:58:28', '2025-11-13 22:58:53'),
+(4, 'FIL10CUR', 'Filipino', 'Filipino', 'Mon, Tue, Wed, Thu, Fri', '16:00:00', '17:00:00', 'Curie', 5, 3, 1, '2025-10-20 23:01:24', '2025-11-12 23:12:09'),
+(5, 'MAP10CUR', 'MAPEH', 'MAPEH', 'Mon, Tue, Wed, Thu, Fri', '09:00:00', '10:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:49:39', '2025-11-12 23:12:17'),
+(6, 'SCI10CUR', 'Science', 'Science', 'Mon, Tue, Wed, Thu, Fri', '11:00:00', '12:00:00', 'CURIE', 5, 3, 1, '2025-10-28 15:53:01', '2025-11-12 23:12:23'),
+(7, 'ESP10CUR', 'ESP', 'ESP', 'Mon, Tue, Wed, Thu, Fri', '12:00:00', '13:00:00', 'Curie', 5, 3, 1, '2025-10-28 15:54:16', '2025-11-12 23:12:29'),
+(8, 'TLE10CUR', 'TLE', 'TLE', 'Mon, Tue, Wed, Thu, Fri', '13:00:00', '14:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:24:47', '2025-11-12 23:12:34'),
+(9, 'AP10CUR', 'AP', 'AP', 'Mon, Tue, Wed, Thu, Fri', '14:00:00', '15:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:26:36', '2025-11-12 23:12:39'),
+(10, 'MTH10CUR', 'Math', 'Math', 'Mon, Tue, Wed, Thu, Fri', '15:00:00', '16:00:00', 'Curie', 5, 3, 1, '2025-10-28 16:28:51', '2025-11-12 23:12:45');
 
 -- --------------------------------------------------------
 
@@ -373,10 +374,10 @@ INSERT INTO `users` (`users_id`, `employee_no`, `username`, `password`, `first_n
 (1, 'E250001', 'sysAdmin01', '$2y$10$YyqkpqOQlwbBEY4sQolq5ea4Z9eAXDwnISkbgZVyl.3PctA..b45q', 'Ryan Jake', 'Daz', 'rjdaz@gmail.com', '09123456789', 'System Admin', 1, 3, '2025-09-23 18:14:26', '2025-09-18 22:58:56', '2025-10-26 10:07:52', 'active'),
 (2, 'E250002', 'sysAdmSupport01', '$2y$10$Rytkpm9LZAHP0iXrOu5tCeL2qRHS64UOiFAL0am0gEMoj37KIm4jm', 'Joyce Mariane', 'Dagsil', 'joycemariane@gmail.com', '09171234567', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:11:48', '2025-10-26 10:08:00', 'active'),
 (3, 'E250003', 'sysAdmSupport02', '$2y$10$UeJlioPdNMo4GdyvGsLnfuAu3PbpOzEcWGd.h5ZOjLJ/7G2pfd92i', 'Roince', 'Jumao-as', 'roince@gmail.com', '09123456789', 'System Admin Support', 1, 4, NULL, '2025-09-18 23:16:43', '2025-10-26 10:08:09', 'active'),
-(4, 'E250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-11-04 16:53:01', '2025-09-18 23:28:16', '2025-11-04 16:53:01', 'active'),
-(5, 'E250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-11-04 16:18:12', '2025-09-18 23:40:56', '2025-11-04 16:18:12', 'active'),
+(4, 'E250004', 'registrar01', '$2y$10$0gaZ.0uxKPhqIPQD6ezC5Oef51jWhc3qVYSKdiq7xHtT41qq7WwjW', 'Marie', 'Dela Cruz', 'delacruz@gmail.com', '09123456789', 'Registrar', 2, 5, '2025-11-04 17:35:30', '2025-09-18 23:28:16', '2025-11-04 17:35:30', 'active'),
+(5, 'E250005', 'teacher01', '$2y$10$Vol7.A3i/o7PglQ4foXVRe4mkSGtskHCNmQJE7RoJqvSOApmgez4u', 'Daren', 'Daz', 'daren@gmail.com', '09987456321', 'Teacher', 3, 2, '2025-11-13 22:55:18', '2025-09-18 23:40:56', '2025-11-13 22:55:18', 'active'),
 (7, 'E250006', 'Teacher02', '$2y$10$/bbtkieNFlK3x9pBYbjv8eJL/FOyofhrEzSiznFEL8wSHJZNFcSKy', 'Juan', 'Dela Cruz', 'delaCruz1@gmail.com', '09171234566', 'Teacher', 3, 2, '2025-10-12 18:53:36', '2025-10-02 20:56:04', '2025-10-26 10:08:38', 'active'),
-(8, 'E250007', 'Staff01', '$2y$10$KQTRANiD3pDQV.cPvn4pXe8s1IokTlXmYKUKe1UNmZysRxyTCGPA6', 'Rhyan', 'Orosco', 'orosco@gmail.com', '09987456123', 'staff', 5, 1, '2025-11-04 17:29:18', '2025-10-26 10:10:13', '2025-11-04 17:29:18', 'active');
+(8, 'E250007', 'Staff01', '$2y$10$KQTRANiD3pDQV.cPvn4pXe8s1IokTlXmYKUKe1UNmZysRxyTCGPA6', 'Rhyan', 'Orosco', 'orosco@gmail.com', '09987456123', 'staff', 5, 1, '2025-11-12 21:49:31', '2025-10-26 10:10:13', '2025-11-12 21:49:31', 'active');
 
 --
 -- Indexes for dumped tables
@@ -478,7 +479,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `attendances`
 --
 ALTER TABLE `attendances`
-  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
+  MODIFY `attendance_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=116;
 
 --
 -- AUTO_INCREMENT for table `attendances_per_subject`
@@ -502,7 +503,7 @@ ALTER TABLE `gradelevel`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `notification_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `organization`

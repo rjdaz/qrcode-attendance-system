@@ -175,6 +175,12 @@ const AttendanceHistory = ({
       alert("You need to select Date before you Download!");
       return;
     }
+
+    if (!filteredAllclassesData || filteredAllclassesData.length < 1) {
+      alert("No attendance records found");
+      return;
+    }
+    
     // Prepare CSV headers
     const headers = [
       "DATE",

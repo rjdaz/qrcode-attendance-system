@@ -22,7 +22,7 @@
     } else {
         echo json_encode(['success' => false, 'message' => 'No classes found']);
     }
-  
-    
+
+    $stmt->close();
   }
 ?>

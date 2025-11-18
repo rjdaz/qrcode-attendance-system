@@ -35,16 +35,6 @@ const Login = ({ apiUrl, loginStatus, setLoginStatus, user, setUser }) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // if (!rememberMe) {
-    //   setRemMeError(true);
-
-    //   setTimeout(() => {
-    //     setRemMeError(false);
-    //     setIsSubmitting(false);
-    //   }, 2000);
-    //   return;
-    // }
-
     try {
       const url = `${apiUrl}login`;
       const response = await axios.post(url, { username, password });

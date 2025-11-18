@@ -35,6 +35,8 @@ const AttendanceTable = ({
   const [allStudentsBySubjects, setAllStudentsBySubjects] = useState([]);
   const [checkedMap, setCheckedMap] = useState({});
   const [subjectAttendances, setSubjectAttendances] = useState([]);
+  const [seacrhData, setSearchData] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
   const date = fixDate;
   const time = fixTime;
@@ -168,6 +170,63 @@ const AttendanceTable = ({
     allStudentsBySubjects.length -
       allAttendances.filter((e) => e.status === "Present") || 0;
 
+  // filter students list allStudentsBySubjects
+  const filterStudentsList = useMemo(() => {
+    if (seacrhData && seacrhData.length >= 2) {
+      return allStudentsBySubjects.filter(
+        (s) =>
+          s.first_name.toLowerCase().includes(seacrhData.toLowerCase()) ||
+          s.last_name.toLowerCase().includes(seacrhData.toLowerCase()) ||
+          s.roll_number.toLowerCase().includes(seacrhData.toLowerCase()) ||
+          s.email.toLowerCase().includes(seacrhData.toLowerCase())
+      );
+    }
+    return allStudentsBySubjects;
+  }, [seacrhData, allStudentsBySubjects]);
+
+  // filter status of the students
+  const statusFilteredStudentIds = useMemo(() => {
+    if (selectedStatus === "all") {
+      return null; // No status filtering
+    }
+
+    if (selectedStatus === "Present" || selectedStatus === "Late") {
+      return new Set(
+        allAttendances
+          .filter((att) => att.status === selectedStatus)
+          .map((att) => att.student_id)
+      );
+    } else if (selectedStatus === "Absent") {
+      // Students with null/no status in allAttendances
+      return new Set(
+        allStudentsBySubjects
+          .filter(
+            (student) =>
+              !allAttendances.find(
+                (att) =>
+                  att.student_id === student.student_id && att.status !== null
+              )
+          )
+          .map((s) => s.student_id)
+      );
+    }
+
+    return null;
+  }, [allAttendances, allStudentsBySubjects, selectedStatus]);
+
+  //Combine both filters
+  const finalFilteredStudents = useMemo(() => {
+    let result = filterStudentsList;
+
+    if (statusFilteredStudentIds) {
+      result = result.filter((student) =>
+        statusFilteredStudentIds.has(student.student_id)
+      );
+    }
+
+    return result;
+  }, [filterStudentsList, statusFilteredStudentIds]);
+
   console.log("Subject ID: ", getSubjectId);
   console.log(allAttendances);
   console.log(allStudentsBySubjects);
@@ -175,6 +234,8 @@ const AttendanceTable = ({
   console.log(classes);
   console.log(time);
   console.log("Section ID in Classes: ", sectionIdFromClasses);
+  console.log(seacrhData);
+  console.log(selectedStatus);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -213,11 +274,7 @@ const AttendanceTable = ({
                 {allAttendances.filter((a) => a.status === "Late").length} late
               </p>
             </div>
-            <div className="flex items-center space-x-2">
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                <Download className="h-4 w-4" />
-                <span>Export CSV</span>
-              </button>
+            <div className="flex items-center space-x-2 w-50">
             </div>
           </div>
         </div>
@@ -232,22 +289,30 @@ const AttendanceTable = ({
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <input
                   type="text"
+                  value={seacrhData}
+                  onChange={(e) => setSearchData(e.target.value)}
                   placeholder="Search by name, ID, or email..."
                   className="pl-10 pr-4 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 w-full sm:w-64"
                 />
               </div>
-              <select className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+              >
                 <option value="all">All Status</option>
-                <option value="present">Present</option>
-                <option value="absent">Absent</option>
-                <option value="late">Late</option>
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+                <option value="Late">Late</option>
               </select>
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-slate-600">
                 {allStudentsBySubjects.length} students
               </span>
-              <button className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200">
+              <button
+                onClick={()=>window.location.reload()}
+                className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all duration-200">
                 <RefreshCw className="h-4 w-4" />
               </button>
             </div>
@@ -299,7 +364,7 @@ const AttendanceTable = ({
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-slate-200">
-                {allStudentsBySubjects
+                {finalFilteredStudents
                   .sort((a, b) => {
                     const genderCompare = b.gender.localeCompare(a.gender);
                     if (genderCompare !== 0) return genderCompare;
@@ -307,11 +372,10 @@ const AttendanceTable = ({
                     return a.last_name.localeCompare(b.last_name);
                   })
                   .map((student) => {
-                    const attendance = allAttendances.find(
-                      (att) =>
-                        att.student_id === student.student_id &&
-                        att.date === date
-                    );
+                    const attendance = allAttendances.find((att) => {
+                      att.student_id === student.student_id &&
+                        att.date === date;
+                    });
 
                     return (
                       <tr

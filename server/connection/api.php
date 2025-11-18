@@ -11,6 +11,7 @@
       include '../components/teacher_dashboard/getClassesToday.php';
       include '../components/teacher_dashboard/getClassAdvisorData.php';
       include '../components/teacher_dashboard/getStudentsInSection.php';
+      include '../components/teacher_dashboard/getAllSubjectsOfTheTeacher.php';
     // student info
       include '../components/admin_dashboard/student/registerStudent.php';
       include '../components/admin_dashboard/student/getStudentStats.php';
@@ -64,6 +65,9 @@
     case 'getStudentsInSection': // get students in section
       getStudentsInSection($conn);
     break;
+    case 'getAllSubjectsOfTheTeacher':
+      getAllSubjectsOfTheTeacher($conn); // get all subjects of the teacher
+      break;
     // student info
     case 'registerStudent':
       registerStudent($conn);

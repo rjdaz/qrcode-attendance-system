@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -52,7 +51,7 @@ function App() {
 
   const [getDatePrevSubject, setGetDatePrevSubject] = useState(() => {
     return localStorage.getItem("getDatePrevSubject");
-  })
+  });
 
   // Update localStorage whenever loginStatus or name changes
   useEffect(() => {
@@ -147,6 +146,7 @@ function App() {
                 apiUrl={apiUrl}
                 fixDate={fixDate}
                 userId={user?.userId}
+                userSectionId={user?.sectionId}
                 setGetSubjectId={setGetSubjectId}
                 setGetDatePrevSubject={setGetDatePrevSubject}
               />

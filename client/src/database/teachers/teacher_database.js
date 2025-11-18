@@ -18,7 +18,11 @@ export const fetchClasses = async (apiUrl, teacherId, setClasses) => {
 };
 
 // fetch class adviser details
-export const getClassAdviserDetails = async (apiUrl, userId, SetClassAdviser) => {
+export const getClassAdviserDetails = async (
+  apiUrl,
+  userId,
+  SetClassAdviser
+) => {
   const url = `${apiUrl}getClassAdvisorData`;
 
   try {
@@ -35,7 +39,11 @@ export const getClassAdviserDetails = async (apiUrl, userId, SetClassAdviser) =>
 };
 
 // fetch all students in a section
-export const fetchStudentsInSection = async (apiUrl, sectionId, setStudents) => {
+export const fetchStudentsInSection = async (
+  apiUrl,
+  sectionId,
+  setStudents
+) => {
   const url = `${apiUrl}getStudentsInSection`;
   try {
     const response = await axios.post(url, {
@@ -52,3 +60,27 @@ export const fetchStudentsInSection = async (apiUrl, sectionId, setStudents) => 
   }
 };
 
+// fetch all the subject of the teacher
+export const fetchAllSubjectsOfTheTeacher = async (
+  apiUrl,
+  userId,
+  setSelectAllSubjectOfTheTeacher
+) => {
+  const url = `${apiUrl}getAllSubjectsOfTheTeacher`;
+
+  try {
+    const response = await axios.post(url, {
+      userId,
+    });
+
+    if (response.data.success) {
+      console.log('Data Fetched');
+      setSelectAllSubjectOfTheTeacher(response.data.allSubjects);
+    } else {
+      console.log(response.data.message);
+      setSelectAllSubjectOfTheTeacher([]);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};

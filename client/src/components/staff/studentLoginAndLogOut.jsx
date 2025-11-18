@@ -91,128 +91,14 @@ const GuardScanner = ({
   const newTime = time.toTimeString().split(" ")[0];
 
   console.log(allStudents);
-  console.log(sectionId); 
+  console.log(sectionId);
   console.log(date);
   console.log(attendanceType);
   console.log(sortingByStartTimeAndDay);
   console.log(allSubjBySect);
-  console.log(startTime)
+  console.log(startTime);
   console.log(newTime);
   console.log(sortingByStartTimeAndDay?.[0]?.start_time);
-  /*
-  useEffect(() => {
-    const containerId = "guard-qr-reader";
-
-    if (!scannerRef.current) {
-      scannerRef.current = new Html5Qrcode(containerId);
-    }
-
-    const startScanner = async () => {
-      try {
-        if (isRunningRef.current) return;
-        setIsScanning(true);
-        await scannerRef.current.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 300, height: 300 } },
-          (decodedText) => {
-            const now = Date.now();
-
-            // Prevent multiple scans too quickly (spam)
-            if (now - lastScanTimeRef.current < scanCooldown) return;
-
-            lastScanTimeRef.current = now;
-            handleScanSuccess(decodedText);
-          }
-        );
-        isRunningRef.current = true;
-      } catch (err) {
-        console.error("Failed to start scanner:", err);
-        setScanStatus("error");
-        setIsScanning(false);
-      }
-    };
-
-    startScanner();
-
-    return () => {
-      const stopScanner = async () => {
-        if (scannerRef.current && isRunningRef.current) {
-          try {
-            await scannerRef.current.stop();
-            isRunningRef.current = false;
-            scannerRef.current.clear();
-            setIsScanning(false);
-          } catch (err) {
-            if (
-              !err.message.includes("not running") &&
-              !err.message.includes("under transition")
-            ) {
-              console.warn("Error stopping scanner:", err);
-            }
-          }
-        }
-      };
-      stopScanner();
-    };
-  }, []);
-
-  const handleScanSuccess = (decodedText) => {
-    setScanResult(decodedText);
-    setScanStatus("success");
-
-    // Automatically detect and record attendance
-    handleAutomaticAttendanceRecord(decodedText);
-  };
-
-  const handleAutomaticAttendanceRecord = async (qrData) => {
-    setIsRecording(true);
-
-    try {
-      // Simulate API call for attendance recording
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const currentTime = new Date().toLocaleString();
-      setLastRecorded({
-        type: attendanceType,
-        data: qrData,
-        time: currentTime,
-        status: "success",
-      });
-
-      // Clear scan result after recording
-      setTimeout(() => {
-        setScanResult(null);
-        setScanStatus("ready");
-      }, 3000);
-    } catch (error) {
-      console.error("Error recording attendance:", error);
-      setLastRecorded({
-        type: attendanceType,
-        data: qrData,
-        time: new Date().toLocaleString(),
-        status: "error",
-      });
-    } finally {
-      setIsRecording(false);
-    }
-  };
-
-  const handleBack = () => {
-    if (scannerRef.current && isRunningRef.current) {
-      scannerRef.current
-        .stop()
-        .then(() => {
-          scannerRef.current.clear();
-          isRunningRef.current = false;
-          navigate("/adminDashboard");
-        })
-        .catch(() => {
-          navigate("/adminDashboard");
-        });
-    } else {
-      navigate("/adminDashboard");
-    }
-  }; */
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">

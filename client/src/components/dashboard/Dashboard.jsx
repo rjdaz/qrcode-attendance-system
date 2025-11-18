@@ -43,6 +43,7 @@ const Dashboard = ({
   const [allStudents, setAllStudents] = useState([]);
   const [allSubjectData, setAllSubjectData] = useState([]);
   const [allAttendance, setAllAttendance] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // get the current date
   const date = fixDate;
@@ -90,6 +91,14 @@ const Dashboard = ({
   const ampm = (time) => {
     return time >= "12:00" ? "PM" : "AM";
   };
+
+  // filter on search bar
+  const filterData =
+    searchTerm.length < 2
+      ? classes
+      : classes.filter((item) =>
+          item.subject_name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -268,85 +277,16 @@ const Dashboard = ({
                 <input
                   type="text"
                   placeholder="Search classes..."
-                  // value={searchTerm}
-                  // onChange={(e) => setSearchTerm(e.target.value)}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 pr-4 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 w-full sm:w-64"
                 />
               </div>
-              <select
-                // value={filterStatus}
-                // onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-              >
-                <option value="all">All Classes</option>
-                <option value="high">High Attendance (≥85%)</option>
-                <option value="medium">Medium Attendance (70-84%)</option>
-                <option value="low">Low Attendance (&lt;70%)</option>
-              </select>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {/*  */}
-            {/* <div
-              // key={cls.id}
-              className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
-            >
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex-1">
-                    <h3 className="text-xl font-bold text-slate-900 mb-2">
-                      {cls.name}
-                    </h3>
-                    <p className="text-blue-600 font-semibold text-lg">
-                      {cls.subject}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 text-sm font-semibold rounded-full border `}
-                  >
-                    {getAttendanceColor(cls.attendancePercentage)}
-                      {cls.attendancePercentage}%
-                  </span>
-                </div>
-
-                <div className="space-y-3 mb-6">
-                  <div className="flex items-center text-slate-600">
-                    <Calendar className="h-4 w-4 mr-3 text-blue-500" />
-                    <span className="font-medium">{cls.schedule}</span>
-                  </div>
-                  <div className="flex items-center text-slate-600">
-                    <Users className="h-4 w-4 mr-3 text-blue-500" />
-                    <span className="font-medium">
-                      {cls.totalStudents} students • {cls.presentToday}{" "}
-                      present today
-                    </span>
-                  </div>
-                  <div className="flex items-center text-slate-600">
-                    <Clock className="h-4 w-4 mr-3 text-blue-500" />
-                    <span className="font-medium">{cls.room}</span>
-                  </div>
-                </div>
-
-                <div className="flex space-x-3">
-                  <button
-                    onClick={() => navigate("/scanner")}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
-                  >
-                    <QrCode className="h-4 w-4 mr-2" />
-                    Start Scanning
-                  </button>
-                  <button
-                    onClick={() => navigate("/attendance")}
-                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 border border-slate-200"
-                  >
-                    View Attendance
-                  </button>
-                </div>
-              </div>
-            </div> */}
-            {/*  */}
-            {classes.map((cls) => (
+            {filterData.map((cls) => (
               <div
                 key={cls.subject_id}
                 className="bg-white rounded-2xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"

@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Html5Qrcode } from "html5-qrcode";
 import {
   ArrowLeft,
   Shield,
@@ -315,6 +314,11 @@ const GuardScanner = ({
                               console.log("student:", findStudentByRollNumber);
                               console.log(findStudentByRollNumber?.student_id);
 
+                              const statusData =
+                                  fixTime <= newTime ? "Present" : "Late";
+
+                                console.log(statusData);
+
                               // if the student is going to time in
                               if (attendanceType === "timein") {
                                 console.log("timein");
@@ -327,11 +331,6 @@ const GuardScanner = ({
                                 }
 
                                 const url = `${apiUrl}qrcodeAttendance`;
-
-                                const statusData =
-                                  fixTime <= newTime ? "Present" : "Late";
-
-                                console.log(statusData);
 
                                 try {
                                   const responce = await axios.post(url, {

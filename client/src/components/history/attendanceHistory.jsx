@@ -177,10 +177,10 @@ const AttendanceHistory = ({
     }
 
     if (!filteredAllclassesData || filteredAllclassesData.length < 1) {
-      alert("No attendance records found");
+      alert("No attendance records found!");
       return;
     }
-    
+
     // Prepare CSV headers
     const headers = [
       "DATE",
@@ -396,12 +396,14 @@ const AttendanceHistory = ({
                   Avg. Attendance
                 </p>
                 <p className="text-2xl font-bold text-green-600">
-                  {(
+                  {
+                    allSubjectData.length > 0 && totalStudentsPerSubjects > 0? 
+                    (
                     (allSubjectData.filter((sp) => sp.teacher_id === userId)
                       .length /
                       totalStudentsPerSubjects) *
                     100
-                  ).toFixed(2)}
+                  ).toFixed(2) : "0"}
                   %
                 </p>
               </div>

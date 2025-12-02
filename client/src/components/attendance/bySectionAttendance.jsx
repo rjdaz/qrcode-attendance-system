@@ -22,6 +22,7 @@ const FullAttendance = ({ apiUrl, user, fixDate }) => {
   const [allSubjBySect, setAllSubjBySect] = useState([]);
   const [statusFilter, setStatusFilter] = useState("all");
   const [subjAttendance, setSubjAttendance] = useState([]);
+  const [subjectHL, setSubjectHL] = useState('');
 
   const date = fixDate;
 
@@ -221,7 +222,7 @@ const FullAttendance = ({ apiUrl, user, fixDate }) => {
                   {allSubjBySect.map((subj, idx) => (
                     <th
                       key={`hdr-${idx}`}
-                      className="text-center px-2 py-2 min-w-[100px]"
+                      className={`text-center px-2 py-2 min-w-[100px] ${subjectHL === subj.subject_id ? 'bg-green-300' : ''}`}
                     >
                       {subj.subject_name}
                     </th>
@@ -240,7 +241,7 @@ const FullAttendance = ({ apiUrl, user, fixDate }) => {
                         {`${student.last_name}, ${student.first_name} ${student.middle_name}`}
                       </p>
                     </td>
-                    <td className="px-3 py-3">
+                    <td className="px-0 py-3">
                       {student.time_in ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 text-sm font-medium border border-emerald-100">
                           {formattedTime(student.time_in)}
@@ -281,7 +282,10 @@ const FullAttendance = ({ apiUrl, user, fixDate }) => {
                       return (
                         <td
                           key={`${student.student_id}-${idx}`}
-                          className="px-2 py-3 text-center min-w-[120px]"
+                          className={`px-2 py-3 text-center min-w-[120px] `}
+                          onMouseEnter={() => setSubjectHL(attendanceRecord.subject_id)}
+                          onMouseLeave={() => setSubjectHL('')}
+
                         >
                           <span
                             className={`inline-flex items-center justify-center px-2.5 py-1 rounded-md text-xs font-medium border ${style}`}
@@ -294,7 +298,7 @@ const FullAttendance = ({ apiUrl, user, fixDate }) => {
                     <td className="px-3 py-3 text-right">
                       {student.time_out ? (
                         <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-sm font-medium border border-indigo-100">
-                          {student.time_out}
+                          {formattedTime(student.time_out)}
                         </span>
                       ) : (
                         <span className="text-sm text-slate-400">-</span>

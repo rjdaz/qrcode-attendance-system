@@ -84,3 +84,19 @@ export const fetchAllSubjectsOfTheTeacher = async (
     console.log(err);
   }
 };
+
+export const getAllTeacherData = async (apiUrl, setGetAllTeacher) => {
+  const url = `${apiUrl}getAllTeachersData`;
+
+  try {
+    const response = await axios.get(url);
+
+    if (response.data.success){
+      setGetAllTeacher(response.data.allTeachers);
+    } else {
+      console.log(response.data.message);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};

@@ -26,6 +26,10 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import axios from "axios";
+import {AllgradeLevel} from '../../database/gradeLevel/gradeLevel.js';
+import {AllSection} from '../../database/section/section.js';
+import {getAllTeacherData} from '../../database/teachers/teacher_database.js'
+import {getAllSubjectData} from '../../database/subjects/subjects.js'
 
 const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
   // Simple beginner-friendly state and data
@@ -91,6 +95,12 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
   });
   const [notifications, setNotifications] = useState([]);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [getAllgradeLevel, setGetAllgradeLevel] = useState([]);
+  const [getAllSection, setGetAllSection] = useState([]);
+  const [getAllTeacher, setGetAllTeacher] = useState([]);
+  const [allSubjectData, setAllSubjectData] = useState([]);
+
+  console.log(getAllTeacher);
 
   // Fetch students from database
   const fetchStudents = async () => {
@@ -111,22 +121,6 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
       setStudentsLoading(false);
     }
   };
-
-  // // Auto-increment roll number based on grade level and section
-  // const autoIncrementRollNumber = (gradeLevel, section) => {
-  //   const filtered = students.filter(
-  //     (s) =>
-  //       s.grade_level === parseInt(gradeLevel) &&
-  //       s.section === parseInt(section) &&
-  //       s.roll_number
-  //   );
-
-  //   if (filtered.length === 0) return 1;
-  //   const maxRoll = Math.max(
-  //     ...filtered.map((s) => parseInt(s.roll_number))
-  //   );
-  //   return maxRoll + 1;
-  // };
 
   // Fetch student statistics from database
   const fetchStudentStats = async () => {
@@ -156,6 +150,10 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
   useEffect(() => {
     fetchStudentStats();
     fetchStudents();
+    AllgradeLevel(apiUrl,setGetAllgradeLevel);
+    AllSection(apiUrl, setGetAllSection);
+    getAllTeacherData(apiUrl, setGetAllTeacher);
+    getAllSubjectData(apiUrl, setAllSubjectData);
   }, []);
 
   // Fetch notifications
@@ -371,6 +369,10 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
       setEditSaving(false);
     }
   };
+
+  console.log(getAllSection);
+  console.log(students);
+  
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -613,7 +615,11 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                     <p className="text-sm text-slate-600">
                       Teachers Pending Approval
                     </p>
-                    <p className="text-2xl font-bold text-slate-900">8</p>
+                    <p className="text-2xl font-bold text-slate-900">
+                    {
+                      getAllTeacher.filter((t) => t.status === 'inactive').length
+                    }
+                    </p>
                   </div>
                   <UserPlus className="h-8 w-8 text-amber-600" />
                 </div>
@@ -687,7 +693,7 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                         : studentStats.inactive.toLocaleString()}
                     </p>
                   </div>
-                  <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                  {/* <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
                     <p className="text-sm text-slate-600">
                       With Attendance Issues
                     </p>
@@ -696,7 +702,7 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                         ? "Loading..."
                         : studentStats.withAttendanceIssues.toLocaleString()}
                     </p>
-                  </div>
+                  </div> */}
                 </div>
                 <div className="overflow-x-auto rounded-xl border border-slate-200">
                   <table className="min-w-full divide-y divide-slate-200">
@@ -828,25 +834,42 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-200">
-                      <tr className="hover:bg-slate-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
-                          Maria Santos
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          Mathematics
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-amber-700 bg-amber-50 border-amber-200">
-                            <AlertCircle className="h-4 w-4" />
-                            <span className="ml-1">Pending Approval</span>
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          <button className="text-slate-400 hover:text-slate-600">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
+                      {
+                        getAllTeacher.map((t) => {
+
+                          const selectedSubjByTeacher = allSubjectData.filter((s) => s.teacher_id === t.users_id)
+
+                          return (
+                            <tr
+                            key={t.users_id}
+                            className="hover:bg-slate-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                {t.last_name}, {t.first_name}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600"
+                              title={selectedSubjByTeacher.map((s) => s.subject_name).join('\n')}
+                              >
+                                {
+                                  selectedSubjByTeacher.map((s) => s.subject_name).join(', ')
+                                }
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border text-amber-700 ${t.status === 'active' ? 'text-green-700 bg-green-50 border-green-200' :' text-amber-700 bg-amber-50 border-amber-200'}`}>
+                                  <AlertCircle className="h-4 w-4" />
+                                  <span className="ml-1">
+                                    {t.status}
+                                  </span>
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                <button className="text-slate-400 hover:text-slate-600">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        })
+                      }
                     </tbody>
                   </table>
                 </div>
@@ -921,22 +944,39 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-slate-200">
-                      <tr className="hover:bg-slate-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
-                          Grade 10 - Ruby
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          Maria Santos
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          45
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                          <button className="text-slate-400 hover:text-slate-600">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
+                      {
+                        getAllSection.map((s) => {
+
+                          return (
+                            <tr 
+                            key={s.section_id}
+                            className="hover:bg-slate-50">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900">
+                                {
+                                  s.section_role
+                                }
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                {
+                                  getAllTeacher.find((t) => t.users_id === s.adviser_teacher_id)?.last_name
+                                }, {
+                                  getAllTeacher.find((t) => t.users_id === s.adviser_teacher_id)?.first_name
+                                }
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                {
+                                  students.filter((st) => Number(st.section) === Number(s.section_id) && Number(st.grade_level) === Number(s.grade_level_id)).length
+                                }
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                                <button className="text-slate-400 hover:text-slate-600">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </button>
+                              </td>
+                            </tr>
+                          )
+                        })
+                      }
                     </tbody>
                   </table>
                 </div>
@@ -1361,29 +1401,47 @@ const AdminLayout = ({ apiUrl, setLoginStatus, setName }) => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Grade Level ID
+                      Grade Level
                     </label>
-                    <input
-                      type="number"
+                    <select
                       name="grade_level"
                       value={studentForm.grade_level}
                       onChange={handleStudentChange}
                       required
                       className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    >
+                      <option value="">Select Grade Level</option>
+                      {
+                      getAllgradeLevel.map((grade) => {
+                        return (
+                          <option value={grade.grade_level_id}>{grade.grade_name}</option>
+                        )
+                      })
+                    }
+                      </select>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">
-                      Section ID
+                      Section
                     </label>
-                    <input
-                      type="number"
+                    <select
                       name="section"
                       value={studentForm.section}
                       onChange={handleStudentChange}
                       required
                       className="w-full px-3 py-2 border-2 border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
+                    > 
+                    <option value="">Select Section</option>
+                    {
+                      getAllSection.filter((section) => {
+                          return Number(section.grade_level_id) === Number(studentForm.grade_level);
+                      }).map((sec) => {
+                          return (
+                            <option value={sec.section_id}>{sec.section_name}</option>
+                          )
+                        })
+                    }
+                    </select>
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">

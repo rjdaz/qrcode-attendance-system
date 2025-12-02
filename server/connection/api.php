@@ -12,6 +12,7 @@
       include '../components/teacher_dashboard/getClassAdvisorData.php';
       include '../components/teacher_dashboard/getStudentsInSection.php';
       include '../components/teacher_dashboard/getAllSubjectsOfTheTeacher.php';
+      include '../components/teacher_dashboard/getAllTeachersData.php';
     // student info
       include '../components/admin_dashboard/student/registerStudent.php';
       include '../components/admin_dashboard/student/getStudentStats.php';
@@ -39,6 +40,10 @@
       include '../components/student_subj_att/attendancePerSubject.php';
       include '../components/student_subj_att/getAllsubjAttendanceByday.php';
       include '../components/student_subj_att/getAllAttendancePerSubjectByTeacher.php';
+    // gradelevel
+      include '../components/gradeLevel/getAllGradeLevel.php';
+    //section
+      include '../components/section/getAllSection.php';
 
   $action = isset($_GET['action']) ? $_GET['action'] : '';
 
@@ -68,6 +73,9 @@
     case 'getAllSubjectsOfTheTeacher':
       getAllSubjectsOfTheTeacher($conn); // get all subjects of the teacher
       break;
+    case 'getAllTeachersData':
+      getAllTeachersData($conn);
+    break;
     // student info
     case 'registerStudent':
       registerStudent($conn);
@@ -126,6 +134,13 @@
     break;
     case 'getAllAttendancePerSubjectByTeacher':
       getAllAttendancePerSubjectByTeacher($conn);
+    break;
+    //grade level
+    case 'getAllGradeLevel':
+      getAllGradeLevel($conn);
+    break;
+    case 'getAllSection':
+      getAllSection($conn);
     break;
     default:
       echo "Invalid action"; 

@@ -230,6 +230,7 @@ const AttendanceTable = ({
   console.log("Subject ID: ", getSubjectId);
   console.log(allAttendances);
   console.log(allStudentsBySubjects);
+  console.log(finalFilteredStudents)
   console.log("Date: ", fixDate);
   console.log(classes);
   console.log(time);
@@ -372,11 +373,12 @@ const AttendanceTable = ({
                     return a.last_name.localeCompare(b.last_name);
                   })
                   .map((student) => {
-                    const attendance = allAttendances.find((att) => {
+                    const attendance = allAttendances.find((att) => 
                       att.student_id === student.student_id &&
-                        att.date === date;
-                    });
+                        att.date === date
+                    );
 
+                    console.log(attendance);
                     return (
                       <tr
                         key={student.student_id}
